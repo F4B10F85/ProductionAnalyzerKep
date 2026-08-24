@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Production Analyzer Kep</title>
+
+    <link
+        rel="stylesheet"
+        href="assets/css/main.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="app-header">
+
+        <div>
+
+            <h1>
+                Production Analyzer Kep
+            </h1>
+
+            <p>
+                Analisi e gestione degli ordini di produzione
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <main class="app-main">
+
+
+        <!-- =================================================
+             IMPORTAZIONE
+             ================================================= -->
+
+        <section class="import-section">
+
+            <div
+                id="dropZone"
+                class="drop-zone"
+            >
+
+                <div class="drop-icon">
+                    ⇩
+                </div>
+
+                <h2>
+                    Trascina qui il file Excel
+                </h2>
+
+                <p>
+                    Trascina direttamente il file di produzione
+                    all'interno di questa area
+                </p>
+
+                <span>
+                    oppure
+                </span>
+
+                <button
+                    id="selectFileButton"
+                    type="button"
+                >
+                    Seleziona file
+                </button>
+
+                <input
+                    id="fileInput"
+                    type="file"
+                    accept=".xlsx,.xls"
+                    hidden
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DATI IMPORTAZIONE
+             ================================================= -->
+
+        <section
+            id="importDetailsSection"
+            class="import-details-section hidden"
+        >
+
+            <div class="import-details-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2>
+                            Nuova importazione
+                        </h2>
+
+                        <p>
+                            Inserisci il numero dell'Ordine di
+                            Conto Lavoro prima di procedere.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="import-details-body">
+
+
+                    <div class="selected-file">
+
+                        <span class="field-label">
+                            File selezionato
+                        </span>
+
+                        <strong id="selectedFileName">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="odcl-field">
+
+                        <label for="odclInput">
+
+                            Numero ODCL
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <input
+                            id="odclInput"
+                            type="text"
+                            inputmode="numeric"
+                            autocomplete="off"
+                            placeholder="Inserisci numero ODCL"
+                        >
+
+                        <small>
+                            Questo dato è obbligatorio per procedere
+                            con l'importazione.
+                        </small>
+
+                    </div>
+
+
+                    <div class="import-actions">
+
+                        <button
+                            id="cancelImportButton"
+                            type="button"
+                            class="button-secondary"
+                        >
+                            Annulla
+                        </button>
+
+                        <button
+                            id="importButton"
+                            type="button"
+                            class="button-primary"
+                            disabled
+                        >
+                            Importa file
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             STATO
+             ================================================= -->
+
+        <section
+            id="statusSection"
+            class="status-section hidden"
+        >
+
+            <div id="statusMessage"></div>
+
+        </section>
+
+
+        <!-- =================================================
+             ANTEPRIMA IMPORTAZIONE
+             ================================================= -->
+
+        <section
+            id="previewSection"
+            class="preview-section hidden"
+        >
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Anteprima importazione
+                    </h2>
+
+                    <p id="previewInfo"></p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table id="previewTable">
+
+                    <thead>
+
+                        <tr id="previewHeader"></tr>
+
+                    </thead>
+
+                    <tbody id="previewBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ARCHIVIO ODCL
+             ================================================= -->
+
+        <section
+            id="archiveSection"
+            class="archive-section"
+        >
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Archivio ODCL
+                    </h2>
+
+                    <p>
+                        Importazioni presenti nell'archivio locale.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="refreshArchiveButton"
+                    type="button"
+                    class="button-secondary"
+                >
+                    Aggiorna archivio
+                </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table id="archiveTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                ODCL
+                            </th>
+
+                            <th>
+                                Data importazione
+                            </th>
+
+                            <th>
+                                File
+                            </th>
+
+                            <th>
+                                Foglio
+                            </th>
+
+                            <th>
+                                Righe
+                            </th>
+
+                            <th></th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="archiveBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DETTAGLIO ODCL
+             ================================================= -->
+
+        <section
+            id="odclDetailSection"
+            class="odcl-detail-section hidden"
+        >
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 id="odclDetailTitle">
+                        Dettaglio ODCL
+                    </h2>
+
+                    <p id="odclDetailInfo"></p>
+
+                </div>
+
+
+                <button
+                    id="closeODCLButton"
+                    type="button"
+                    class="button-secondary"
+                >
+                    Chiudi
+                </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table id="odclDetailTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Data consegna
+                            </th>
+
+                            <th>
+                                Quantità
+                            </th>
+
+                            <th>
+                                Codice
+                            </th>
+
+                            <th>
+                                Descrizione
+                            </th>
+
+                            <th>
+                                Descrizione estesa
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="odclDetailBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <footer class="app-footer">
+
+        Production Analyzer Kep
+
+    </footer>
+
+
+    <!-- =====================================================
+         LIBRERIA EXCEL
+         ===================================================== -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"
+    ></script>
+
+
+    <!-- =====================================================
+         JAVASCRIPT APPLICAZIONE
+         ===================================================== -->
+
+    <script src="assets/js/importer.js"></script>
+
+    <script src="assets/js/storage.js"></script>
+
+    <script src="assets/js/classifier.js"></script>
+
+    <script src="assets/js/app.js"></script>
+
+
+</body>
+
+</html>
