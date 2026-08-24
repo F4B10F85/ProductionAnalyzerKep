@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Analisi Produzione - Production Analyzer Kep</title>
+
+    <link
+        rel="stylesheet"
+        href="assets/css/analysis.css"
+    >
+
+</head>
+
+
+<body>
+
+    <div class="app-shell">
+
+        <!-- =====================================================
+             TOP BAR
+             ===================================================== -->
+
+        <header class="topbar">
+
+            <div class="topbar-title">
+                <span class="topbar-mark">K</span>
+                <span>Production Analyzer Kep</span>
+            </div>
+
+            <div class="topbar-window-controls" aria-hidden="true">
+                <span>−</span>
+                <span>□</span>
+                <span>×</span>
+            </div>
+
+        </header>
+
+
+        <!-- =====================================================
+             SIDEBAR
+             ===================================================== -->
+
+        <aside class="sidebar">
+
+            <div class="brand">
+
+                <div class="brand-icon" aria-hidden="true">
+                    <span class="brand-icon-sheet">▤</span>
+                    <span class="brand-icon-check">✓</span>
+                </div>
+
+                <div>
+                    <div class="brand-name">KEP</div>
+                    <div class="brand-subtitle">Production Analyzer</div>
+                </div>
+
+            </div>
+
+
+            <nav class="main-nav" aria-label="Navigazione principale">
+
+                <a
+                    class="nav-item"
+                    href="index.html"
+                >
+                    <span class="nav-icon">⇧</span>
+                    <span>IMPORTAZIONE</span>
+                </a>
+
+                <a
+                    class="nav-item"
+                    href="index.html#archiveSection"
+                >
+                    <span class="nav-icon">□</span>
+                    <span>ARCHIVIO ODCL</span>
+                </a>
+
+                <a
+                    class="nav-item active"
+                    href="analysis.html"
+                    aria-current="page"
+                >
+                    <span class="nav-icon">▥</span>
+                    <span>ANALISI</span>
+                </a>
+
+            </nav>
+
+
+            <div class="sidebar-footer">
+
+                <div class="info-icon">i</div>
+
+                <div>
+                    <div>Production Analyzer Kep</div>
+                    <small>Versione 1.0.0</small>
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =====================================================
+             MAIN CONTENT
+             ===================================================== -->
+
+        <main class="content">
+
+            <div class="page-heading">
+
+                <h1>ANALISI PRODUZIONE</h1>
+
+            </div>
+
+
+            <!-- =================================================
+                 ANALISI ODCL
+                 ================================================= -->
+
+            <section class="panel">
+
+                <div class="panel-title">
+                    ANALISI PER ODCL
+                </div>
+
+
+                <div class="filter-row">
+
+                    <div class="field">
+
+                        <label for="analysisODCL">
+                            Seleziona ODCL
+                        </label>
+
+                        <select id="analysisODCL">
+                            <option value="">
+                                Seleziona ODCL
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="result-box">
+
+                    <div
+                        id="odclResultTitle"
+                        class="result-title"
+                    >
+                        SELEZIONA UN ODCL
+                    </div>
+
+
+                    <div class="family-table-wrap">
+
+                        <table class="family-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>END-FAST</th>
+                                    <th>E-LIGHT</th>
+                                    <th>SMART</th>
+                                    <th>KEPPY</th>
+                                    <th>CR&nbsp; 2.0 T</th>
+                                    <th>CR&nbsp; 2.0 S/B</th>
+                                    <th>NOVA</th>
+                                    <th>POLO</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                <tr>
+
+                                    <td id="odcl-end-fast">0</td>
+                                    <td id="odcl-e-light">0</td>
+                                    <td id="odcl-smart">0</td>
+                                    <td id="odcl-keppy">0</td>
+                                    <td id="odcl-cr20t">0</td>
+                                    <td id="odcl-cr20sb">0</td>
+                                    <td id="odcl-nova">0</td>
+                                    <td id="odcl-polo">0</td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <div class="kpi-grid">
+
+                    <article class="kpi-card">
+
+                        <div class="kpi-icon production-icon">□</div>
+
+                        <div>
+
+                            <div class="kpi-label">
+                                TOTALE ARTICOLI PRODOTTI
+                            </div>
+
+                            <div class="kpi-note">
+                                (escluso POLO)
+                            </div>
+
+                            <div
+                                id="odcl-total-quantity"
+                                class="kpi-value blue"
+                            >
+                                0
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                    <article class="kpi-card">
+
+                        <div class="kpi-icon money-icon">€</div>
+
+                        <div>
+
+                            <div class="kpi-label">
+                                TOTALE LAVORAZIONE
+                            </div>
+
+                            <div class="kpi-note">
+                                (tutte le famiglie incluse)
+                            </div>
+
+                            <div
+                                id="odcl-total-value"
+                                class="kpi-value green"
+                            >
+                                0,00 €
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 ANALISI MENSILE
+                 ================================================= -->
+
+            <section class="panel">
+
+                <div class="panel-title">
+                    ANALISI MENSILE
+                </div>
+
+
+                <div class="filter-row monthly-filters">
+
+                    <div class="field">
+
+                        <label for="analysisYear">
+                            Anno
+                        </label>
+
+                        <select id="analysisYear">
+                            <option value="">
+                                Anno
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="analysisMonth">
+                            Mese
+                        </label>
+
+                        <select id="analysisMonth">
+                            <option value="">
+                                Mese
+                            </select>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     RIEPILOGO PER FAMIGLIA
+                     ================================================= -->
+
+                <div class="sub-result-box">
+
+                    <div
+                        id="monthlyFamilyTitle"
+                        class="result-title"
+                    >
+                        RIEPILOGO PER FAMIGLIA
+                    </div>
+
+
+                    <div class="family-table-wrap">
+
+                        <table class="family-table monthly-family-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th class="row-label-head"></th>
+
+                                    <th>END-FAST</th>
+                                    <th>E-LIGHT</th>
+                                    <th>SMART</th>
+                                    <th>KEPPY</th>
+                                    <th>CR&nbsp; 2.0 T</th>
+                                    <th>CR&nbsp; 2.0 S/B</th>
+                                    <th>NOVA</th>
+                                    <th>POLO</th>
+                                    <th class="total-head">TOTALI</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                <tr>
+
+                                    <td class="row-label">
+                                        Quantità
+                                    </td>
+
+                                    <td id="monthly-q-END-FAST">0</td>
+                                    <td id="monthly-q-E-LIGHT">0</td>
+                                    <td id="monthly-q-SMART">0</td>
+                                    <td id="monthly-q-KEPPY">0</td>
+                                    <td id="monthly-q-CR-2-0-T">0</td>
+                                    <td id="monthly-q-CR-2-0-S-B">0</td>
+                                    <td id="monthly-q-NOVA">0</td>
+                                    <td id="monthly-q-POLO">0</td>
+                                    <td id="monthly-q-total" class="total-cell">0</td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td class="row-label">
+                                        Lavorazione (€)
+                                    </td>
+
+                                    <td id="monthly-v-END-FAST">0,00 €</td>
+                                    <td id="monthly-v-E-LIGHT">0,00 €</td>
+                                    <td id="monthly-v-SMART">0,00 €</td>
+                                    <td id="monthly-v-KEPPY">0,00 €</td>
+                                    <td id="monthly-v-CR-2-0-T">0,00 €</td>
+                                    <td id="monthly-v-CR-2-0-S-B">0,00 €</td>
+                                    <td id="monthly-v-NOVA">0,00 €</td>
+                                    <td id="monthly-v-POLO">0,00 €</td>
+                                    <td id="monthly-v-total" class="total-cell">0,00 €</td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     RIEPILOGO PER ODCL
+                     ================================================= -->
+
+                <div class="sub-result-box odcl-monthly-box">
+
+                    <div
+                        id="monthlyODCLTitle"
+                        class="result-title"
+                    >
+                        RIEPILOGO PER ODCL
+                    </div>
+
+
+                    <div class="odcl-table-wrap">
+
+                        <table class="odcl-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ODCL</th>
+                                    <th>Quantità (escluso POLO)</th>
+                                    <th>Lavorazione (€)</th>
+                                    <th>% su lavorazione</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="monthlyODCLBody">
+
+                                <tr>
+                                    <td colspan="4" class="empty-row">
+                                        Seleziona anno e mese.
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="assets/js/analysis.js"></script>
+
+</body>
+
+</html>

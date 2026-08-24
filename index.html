@@ -24,254 +24,401 @@
 
 
     <!-- =====================================================
-         HEADER
+         APP SHELL
          ===================================================== -->
 
-    <header class="app-header">
-
-        <div>
-
-            <h1>
-                Production Analyzer Kep
-            </h1>
-
-            <p>
-                Analisi e gestione degli ordini di produzione
-            </p>
-
-        </div>
-
-    </header>
-
-
-    <!-- =====================================================
-         MAIN
-         ===================================================== -->
-
-    <main class="app-main">
+    <div class="app-shell">
 
 
         <!-- =================================================
-             IMPORTAZIONE
+             TOP BAR
              ================================================= -->
 
-        <section class="import-section">
+        <header class="topbar">
 
-            <div
-                id="dropZone"
-                class="drop-zone"
-            >
+            <div class="topbar-title">
 
-                <div class="drop-icon">
-                    ⇩
-                </div>
-
-                <h2>
-                    Trascina qui il file Excel
-                </h2>
-
-                <p>
-                    Trascina direttamente il file di produzione
-                    all'interno di questa area
-                </p>
-
-                <span>
-                    oppure
+                <span class="topbar-mark">
+                    e
                 </span>
 
-                <button
-                    id="selectFileButton"
-                    type="button"
+                <span>
+                    Production Analyzer Kep
+                </span>
+
+            </div>
+
+
+            <div
+                class="topbar-window-controls"
+                aria-hidden="true"
+            >
+
+                <span>−</span>
+                <span>□</span>
+                <span>×</span>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             SIDEBAR
+             ================================================= -->
+
+        <aside class="sidebar">
+
+
+            <div class="brand">
+
+                <img
+                    class="brand-logo"
+                    src="assets/images/kep-italia.png"
+                    alt="KEP Italia - Superior Helmets"
                 >
-                    Seleziona file
+
+            </div>
+
+
+            <nav
+                class="main-nav"
+                aria-label="Navigazione principale"
+            >
+
+                <button
+                    type="button"
+                    class="nav-item active"
+                    data-section="import"
+                >
+
+                    <span class="nav-icon">
+                        📥
+                    </span>
+
+                    <span>
+                        IMPORTAZIONE
+                    </span>
+
                 </button>
 
-                <input
-                    id="fileInput"
-                    type="file"
-                    accept=".xlsx,.xls"
-                    hidden
+
+                <button
+                    type="button"
+                    class="nav-item"
+                    data-section="archive"
                 >
 
-            </div>
+                    <span class="nav-icon">
+                        🗂️
+                    </span>
 
-        </section>
+                    <span>
+                        ARCHIVIO OdCL
+                    </span>
+
+                </button>
 
 
-        <!-- =================================================
-             DATI IMPORTAZIONE
-             ================================================= -->
+                <button
+                    type="button"
+                    class="nav-item"
+                    data-section="analysis"
+                >
 
-        <section
-            id="importDetailsSection"
-            class="import-details-section hidden"
-        >
+                    <span class="nav-icon">
+                        📊
+                    </span>
 
-            <div class="import-details-card">
+                    <span>
+                        ANALISI
+                    </span>
 
-                <div class="section-header">
+                </button>
+
+            </nav>
+
+
+            <div class="sidebar-footer">
+
+                <div class="info-icon">
+                    i
+                </div>
+
+
+                <div>
 
                     <div>
+                        Production Analyzer Kep
+                    </div>
+
+                    <small>
+                        Versione 1.0.0
+                    </small>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =================================================
+             WORKSPACE
+             ================================================= -->
+
+        <main class="workspace">
+
+
+            <!-- =================================================
+                 IMPORTAZIONE
+                 ================================================= -->
+
+            <section
+                id="workspaceImport"
+                class="workspace-section"
+            >
+
+                <div class="page-heading">
+
+                    <h1>
+                        IMPORTAZIONE
+                    </h1>
+
+                    <p>
+                        Importa i file di produzione e
+                        associali al relativo ODCL.
+                    </p>
+
+                </div>
+
+
+                <!-- DROP ZONE -->
+
+                <section class="import-section">
+
+                    <div
+                        id="dropZone"
+                        class="drop-zone"
+                    >
+
+                        <div class="drop-icon">
+                            ⇩
+                        </div>
+
 
                         <h2>
-                            Nuova importazione
+                            Trascina qui il file Excel
                         </h2>
 
+
                         <p>
-                            Inserisci il numero dell'Ordine di
-                            Conto Lavoro prima di procedere.
+                            Trascina direttamente il file
+                            di produzione all'interno
+                            di questa area
                         </p>
 
-                    </div>
 
-                </div>
-
-
-                <div class="import-details-body">
-
-
-                    <div class="selected-file">
-
-                        <span class="field-label">
-                            File selezionato
+                        <span>
+                            oppure
                         </span>
 
-                        <strong id="selectedFileName">
-                            -
-                        </strong>
 
-                    </div>
+                        <button
+                            id="selectFileButton"
+                            type="button"
+                        >
+                            Seleziona file
+                        </button>
 
-
-                    <div class="odcl-field">
-
-                        <label for="odclInput">
-
-                            Numero ODCL
-
-                            <span class="required">
-                                *
-                            </span>
-
-                        </label>
 
                         <input
-                            id="odclInput"
-                            type="text"
-                            inputmode="numeric"
-                            autocomplete="off"
-                            placeholder="Inserisci numero ODCL"
+                            id="fileInput"
+                            type="file"
+                            accept=".xlsx,.xls"
+                            hidden
                         >
 
-                        <small>
-                            Questo dato è obbligatorio per procedere
-                            con l'importazione.
-                        </small>
+                    </div>
+
+                </section>
+
+
+                <!-- DATI IMPORTAZIONE -->
+
+                <section
+                    id="importDetailsSection"
+                    class="import-details-section hidden"
+                >
+
+                    <div class="import-details-card">
+
+                        <div class="section-header">
+
+                            <div>
+
+                                <h2>
+                                    Nuova importazione
+                                </h2>
+
+                                <p>
+                                    Inserisci il numero
+                                    dell'Ordine di Conto
+                                    Lavoro prima di procedere.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="import-details-body">
+
+
+                            <div class="selected-file">
+
+                                <span class="field-label">
+                                    File selezionato
+                                </span>
+
+                                <strong
+                                    id="selectedFileName"
+                                >
+                                    -
+                                </strong>
+
+                            </div>
+
+
+                            <div class="odcl-field">
+
+                                <label for="odclInput">
+
+                                    Numero ODCL
+
+                                    <span class="required">
+                                        *
+                                    </span>
+
+                                </label>
+
+
+                                <input
+                                    id="odclInput"
+                                    type="text"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    placeholder="Inserisci numero ODCL"
+                                >
+
+
+                                <small>
+                                    Questo dato è obbligatorio
+                                    per procedere con l'importazione.
+                                </small>
+
+                            </div>
+
+
+                            <div class="import-actions">
+
+                                <button
+                                    id="cancelImportButton"
+                                    type="button"
+                                    class="button-secondary"
+                                >
+                                    Annulla
+                                </button>
+
+
+                                <button
+                                    id="importButton"
+                                    type="button"
+                                    class="button-primary"
+                                    disabled
+                                >
+                                    Importa file
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- STATO -->
+
+                <section
+                    id="statusSection"
+                    class="status-section hidden"
+                >
+
+                    <div id="statusMessage"></div>
+
+                </section>
+
+
+                <!-- ANTEPRIMA -->
+
+                <section
+                    id="previewSection"
+                    class="preview-section hidden"
+                >
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h2>
+                                Anteprima importazione
+                            </h2>
+
+                            <p id="previewInfo"></p>
+
+                        </div>
 
                     </div>
 
 
-                    <div class="import-actions">
+                    <div class="table-container">
 
-                        <button
-                            id="cancelImportButton"
-                            type="button"
-                            class="button-secondary"
-                        >
-                            Annulla
-                        </button>
+                        <table id="previewTable">
 
-                        <button
-                            id="importButton"
-                            type="button"
-                            class="button-primary"
-                            disabled
-                        >
-                            Importa file
-                        </button>
+                            <thead>
+
+                                <tr id="previewHeader"></tr>
+
+                            </thead>
+
+
+                            <tbody id="previewBody"></tbody>
+
+                        </table>
 
                     </div>
 
-                </div>
+                </section>
 
-            </div>
-
-        </section>
+            </section>
 
 
-        <!-- =================================================
-             STATO
-             ================================================= -->
+            <!-- =================================================
+                 ARCHIVIO
+                 ================================================= -->
 
-        <section
-            id="statusSection"
-            class="status-section hidden"
-        >
+            <section
+                id="workspaceArchive"
+                class="workspace-section hidden"
+            >
 
-            <div id="statusMessage"></div>
+                <div class="page-heading">
 
-        </section>
-
-
-        <!-- =================================================
-             ANTEPRIMA IMPORTAZIONE
-             ================================================= -->
-
-        <section
-            id="previewSection"
-            class="preview-section hidden"
-        >
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2>
-                        Anteprima importazione
-                    </h2>
-
-                    <p id="previewInfo"></p>
-
-                </div>
-
-            </div>
-
-
-            <div class="table-container">
-
-                <table id="previewTable">
-
-                    <thead>
-
-                        <tr id="previewHeader"></tr>
-
-                    </thead>
-
-                    <tbody id="previewBody"></tbody>
-
-                </table>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             ARCHIVIO ODCL
-             ================================================= -->
-
-        <section
-            id="archiveSection"
-            class="archive-section"
-        >
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2>
-                        Archivio ODCL
-                    </h2>
+                    <h1>
+                        ARCHIVIO Ordini di Conto Lavoro M.V. Montaggi
+                    </h1>
 
                     <p>
                         Importazioni presenti nell'archivio locale.
@@ -280,148 +427,647 @@
                 </div>
 
 
-                <button
-                    id="refreshArchiveButton"
-                    type="button"
-                    class="button-secondary"
+                <section
+                    id="archiveSection"
+                    class="archive-section"
                 >
-                    Aggiorna archivio
-                </button>
 
-            </div>
+                    <div class="section-header">
 
+                        <div>
 
-            <div class="table-container">
+                            <h2>
+                                Importazioni
+                            </h2>
 
-                <table id="archiveTable">
+                            <p>
+                                Elenco degli ordini caricati
+                                nel sistema.
+                            </p>
 
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                ODCL
-                            </th>
-
-                            <th>
-                                Data importazione
-                            </th>
-
-                            <th>
-                                File
-                            </th>
-
-                            <th>
-                                Foglio
-                            </th>
-
-                            <th>
-                                Righe
-                            </th>
-
-                            <th></th>
-
-                        </tr>
-
-                    </thead>
+                        </div>
 
 
-                    <tbody id="archiveBody"></tbody>
+                        <button
+                            id="refreshArchiveButton"
+                            type="button"
+                            class="button-secondary"
+                        >
+                            Aggiorna archivio
+                        </button>
 
-                </table>
-
-            </div>
-
-        </section>
+                    </div>
 
 
-        <!-- =================================================
-             DETTAGLIO ODCL
-             ================================================= -->
+                    <div class="table-container">
 
-        <section
-            id="odclDetailSection"
-            class="odcl-detail-section hidden"
-        >
+                        <table id="archiveTable">
 
-            <div class="section-header">
+                            <thead>
 
-                <div>
+                                <tr>
 
-                    <h2 id="odclDetailTitle">
-                        Dettaglio ODCL
-                    </h2>
+                                    <th>
+                                        ODCL
+                                    </th>
 
-                    <p id="odclDetailInfo"></p>
+                                    <th>
+                                        Data importazione
+                                    </th>
+
+                                    <th>
+                                        File
+                                    </th>
+
+                                    <th>
+                                        Foglio
+                                    </th>
+
+                                    <th>
+                                        Righe
+                                    </th>
+
+                                    <th>
+                                        Azioni
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="archiveBody"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+
+                <!-- DETTAGLIO ODCL -->
+
+                <section
+                    id="odclDetailSection"
+                    class="odcl-detail-section hidden"
+                >
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <h2 id="odclDetailTitle">
+                                Dettaglio ODCL
+                            </h2>
+
+                            <p id="odclDetailInfo"></p>
+
+                        </div>
+
+
+                        <button
+                            id="closeODCLButton"
+                            type="button"
+                            class="button-secondary"
+                        >
+                            Chiudi
+                        </button>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+                        <table id="odclDetailTable">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Data consegna
+                                    </th>
+
+                                    <th>
+                                        Quantità
+                                    </th>
+
+                                    <th>
+                                        Codice
+                                    </th>
+
+                                    <th>
+                                        Descrizione
+                                    </th>
+
+                                    <th>
+                                        Descrizione estesa
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="odclDetailBody"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+
+            <!-- =================================================
+                 ANALISI
+                 ================================================= -->
+
+            <section
+                id="workspaceAnalysis"
+                class="workspace-section hidden"
+            >
+
+                <div class="page-heading">
+
+                    <h1>
+                        ANALISI PRODUZIONE
+                    </h1>
 
                 </div>
 
 
-                <button
-                    id="closeODCLButton"
-                    type="button"
-                    class="button-secondary"
-                >
-                    Chiudi
-                </button>
+                <!-- ANALISI ODCL -->
 
-            </div>
+                <section class="analysis-panel">
+
+                    <div class="panel-title">
+                        ANALISI PER OdCL
+                    </div>
 
 
-            <div class="table-container">
+                    <div class="filter-row">
 
-                <table id="odclDetailTable">
+                        <div class="field">
 
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                Data consegna
-                            </th>
-
-                            <th>
-                                Quantità
-                            </th>
-
-                            <th>
-                                Codice
-                            </th>
-
-                            <th>
-                                Descrizione
-                            </th>
-
-                            <th>
-                                Descrizione estesa
-                            </th>
-
-                        </tr>
-
-                    </thead>
+                            <label for="analysisODCL">
+                                Seleziona ODCL
+                            </label>
 
 
-                    <tbody id="odclDetailBody"></tbody>
+                            <select id="analysisODCL">
 
-                </table>
+                                <option value="">
+                                    Seleziona ODCL
+                                </option>
 
-            </div>
+                            </select>
 
-        </section>
+                        </div>
+
+                    </div>
 
 
-    </main>
+                    <div class="result-box">
+
+                        <div
+                            id="odclResultTitle"
+                            class="result-title"
+                        >
+                            SELEZIONA UN ODCL
+                        </div>
 
 
-    <!-- =====================================================
-         FOOTER
-         ===================================================== -->
+                        <div class="family-table-wrap">
 
-    <footer class="app-footer">
+                            <table class="family-table">
 
-        Production Analyzer Kep
+                                <thead>
 
-    </footer>
+                                    <tr>
+
+                                        <th>END-FAST</th>
+                                        <th>E-LIGHT</th>
+                                        <th>SMART</th>
+                                        <th>KEPPY</th>
+                                        <th>CR 2.0 T</th>
+                                        <th>CR 2.0 S/B</th>
+                                        <th>NOVA</th>
+                                        <th>POLO</th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td id="odcl-end-fast">
+                                            0
+                                        </td>
+
+                                        <td id="odcl-e-light">
+                                            0
+                                        </td>
+
+                                        <td id="odcl-smart">
+                                            0
+                                        </td>
+
+                                        <td id="odcl-keppy">
+                                            0
+                                        </td>
+
+                                        <td id="odcl-cr20t">
+                                            0
+                                        </td>
+
+                                        <td id="odcl-cr20sb">
+                                            0
+                                        </td>
+
+                                        <td id="odcl-nova">
+                                            0
+                                        </td>
+
+                                        <td id="odcl-polo">
+                                            0
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="kpi-grid">
+
+                        <article class="kpi-card">
+
+                            <div class="kpi-icon production-icon" aria-hidden="true">
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+
+                                    <path
+                                        d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        stroke-linejoin="round"
+                                    />
+
+                                    <path
+                                        d="M4.5 7.8L12 12L19.5 7.8"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        stroke-linejoin="round"
+                                    />
+
+                                    <path
+                                        d="M12 12V20.5"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        stroke-linecap="round"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="kpi-label">
+                                    TOTALE ARTICOLI PRODOTTI
+                                </div>
+
+                                <div class="kpi-note">
+                                    (escluso POLO)
+                                </div>
+
+                                <div
+                                    id="odcl-total-quantity"
+                                    class="kpi-value blue"
+                                >
+                                    0
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                        <article class="kpi-card">
+
+                            <div class="kpi-icon money-icon">
+                                €
+                            </div>
+
+
+                            <div>
+
+                                <div class="kpi-label">
+                                    TOTALE LAVORAZIONE
+                                </div>
+
+                                <div class="kpi-note">
+                                    (tutte le famiglie incluse)
+                                </div>
+
+                                <div
+                                    id="odcl-total-value"
+                                    class="kpi-value green"
+                                >
+                                    0,00 €
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ANALISI MENSILE -->
+
+                <section class="analysis-panel">
+
+                    <div class="panel-title">
+                        ANALISI MENSILE
+                    </div>
+
+
+                    <div class="filter-row monthly-filters">
+
+
+                        <div class="field">
+
+                            <label for="analysisYear">
+                                Anno
+                            </label>
+
+
+                            <select id="analysisYear">
+
+                                <option value="">
+                                    Anno
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="analysisMonth">
+                                Mese
+                            </label>
+
+
+                            <select id="analysisMonth">
+
+                                <option value="">
+                                    Mese
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- RIEPILOGO FAMIGLIE -->
+
+                    <div class="sub-result-box">
+
+                        <div
+                            id="monthlyFamilyTitle"
+                            class="result-title"
+                        >
+                            RIEPILOGO PER FAMIGLIA
+                        </div>
+
+
+                        <div class="family-table-wrap">
+
+                            <table class="family-table monthly-family-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th class="row-label-head"></th>
+
+                                        <th>END-FAST</th>
+                                        <th>E-LIGHT</th>
+                                        <th>SMART</th>
+                                        <th>KEPPY</th>
+                                        <th>CR 2.0 T</th>
+                                        <th>CR 2.0 S/B</th>
+                                        <th>NOVA</th>
+                                        <th>POLO</th>
+
+                                        <th class="total-head">
+                                            TOTALI
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td class="row-label">
+                                            Quantità
+                                        </td>
+
+                                        <td id="monthly-q-END-FAST">
+                                            0
+                                        </td>
+
+                                        <td id="monthly-q-E-LIGHT">
+                                            0
+                                        </td>
+
+                                        <td id="monthly-q-SMART">
+                                            0
+                                        </td>
+
+                                        <td id="monthly-q-KEPPY">
+                                            0
+                                        </td>
+
+                                        <td id="monthly-q-CR-2-0-T">
+                                            0
+                                        </td>
+
+                                        <td id="monthly-q-CR-2-0-S-B">
+                                            0
+                                        </td>
+
+                                        <td id="monthly-q-NOVA">
+                                            0
+                                        </td>
+
+                                        <td id="monthly-q-POLO">
+                                            0
+                                        </td>
+
+                                        <td
+                                            id="monthly-q-total"
+                                            class="total-cell"
+                                        >
+                                            0
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td class="row-label">
+                                            Lavorazione (€)
+                                        </td>
+
+                                        <td id="monthly-v-END-FAST">
+                                            0,00 €
+                                        </td>
+
+                                        <td id="monthly-v-E-LIGHT">
+                                            0,00 €
+                                        </td>
+
+                                        <td id="monthly-v-SMART">
+                                            0,00 €
+                                        </td>
+
+                                        <td id="monthly-v-KEPPY">
+                                            0,00 €
+                                        </td>
+
+                                        <td id="monthly-v-CR-2-0-T">
+                                            0,00 €
+                                        </td>
+
+                                        <td id="monthly-v-CR-2-0-S-B">
+                                            0,00 €
+                                        </td>
+
+                                        <td id="monthly-v-NOVA">
+                                            0,00 €
+                                        </td>
+
+                                        <td id="monthly-v-POLO">
+                                            0,00 €
+                                        </td>
+
+                                        <td
+                                            id="monthly-v-total"
+                                            class="total-cell"
+                                        >
+                                            0,00 €
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- RIEPILOGO ODCL -->
+
+                    <div class="sub-result-box odcl-monthly-box">
+
+                        <div
+                            id="monthlyODCLTitle"
+                            class="result-title"
+                        >
+                            RIEPILOGO PER ODCL
+                        </div>
+
+
+                        <div class="odcl-table-wrap">
+
+                            <table class="odcl-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            ODCL
+                                        </th>
+
+                                        <th>
+                                            Quantità
+                                            (escluso POLO)
+                                        </th>
+
+                                        <th>
+                                            Lavorazione (€)
+                                        </th>
+
+                                        <th>
+                                            % su lavorazione
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody id="monthlyODCLBody">
+
+                                    <tr>
+
+                                        <td
+                                            colspan="4"
+                                            class="empty-row"
+                                        >
+                                            Seleziona anno e mese.
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+
+        </main>
+
+    </div>
 
 
     <!-- =====================================================
@@ -434,16 +1080,169 @@
 
 
     <!-- =====================================================
-         JAVASCRIPT APPLICAZIONE
+         JAVASCRIPT
          ===================================================== -->
 
     <script src="assets/js/importer.js"></script>
-
     <script src="assets/js/storage.js"></script>
-
     <script src="assets/js/classifier.js"></script>
-
+    <script src="assets/js/analysis.js"></script>
     <script src="assets/js/app.js"></script>
+
+
+    <!-- =====================================================
+         NAVIGAZIONE SPA
+         ===================================================== -->
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            () => {
+
+                const navItems =
+                    document.querySelectorAll(
+                        ".nav-item"
+                    );
+
+
+                const sections = {
+
+                    import:
+                        document.getElementById(
+                            "workspaceImport"
+                        ),
+
+                    archive:
+                        document.getElementById(
+                            "workspaceArchive"
+                        ),
+
+                    analysis:
+                        document.getElementById(
+                            "workspaceAnalysis"
+                        )
+
+                };
+
+
+                function showSection(
+                    sectionName
+                ) {
+
+                    Object.values(
+                        sections
+                    ).forEach(
+                        section => {
+
+                            if (section) {
+
+                                section.classList.add(
+                                    "hidden"
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                    if (
+                        sections[sectionName]
+                    ) {
+
+                        sections[
+                            sectionName
+                        ].classList.remove(
+                            "hidden"
+                        );
+
+                    }
+
+
+                    navItems.forEach(
+                        item => {
+
+                            item.classList.toggle(
+                                "active",
+                                item.dataset.section ===
+                                sectionName
+                            );
+
+                        }
+                    );
+
+
+                    if (
+                        sectionName ===
+                        "archive"
+                    ) {
+
+                        if (
+                            typeof loadArchive ===
+                            "function"
+                        ) {
+
+                            loadArchive();
+
+                        }
+
+                    }
+
+
+                    if (
+                        sectionName ===
+                        "analysis"
+                    ) {
+
+                        if (
+                            typeof initializeAnalysis ===
+                            "function"
+                        ) {
+
+                            initializeAnalysis();
+
+                        }
+                        else if (
+                            typeof initializeAnalysisPage ===
+                            "function"
+                        ) {
+
+                            initializeAnalysisPage();
+
+                        }
+
+                    }
+
+                }
+
+
+                navItems.forEach(
+                    item => {
+
+                        item.addEventListener(
+                            "click",
+                            () => {
+
+                                showSection(
+                                    item.dataset.section
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+                showSection(
+                    "import"
+                );
+
+            }
+        );
+
+    </script>
 
 
 </body>

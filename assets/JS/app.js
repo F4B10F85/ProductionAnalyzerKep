@@ -864,6 +864,14 @@ loadArchive();
 
 /*
 |--------------------------------------------------------------------------
+| Avvio analisi
+|--------------------------------------------------------------------------
+*/
+
+initializeAnalysis();
+
+/*
+|--------------------------------------------------------------------------
 | Apertura dettaglio ODCL
 |--------------------------------------------------------------------------
 */
@@ -875,7 +883,7 @@ async function openODCL(odcl) {
         const records =
             await getRecordsByODCL(
                 odcl
-            );
+            );refreshArchiveButton.addEventListener
 
 
         odclDetailSection.classList.remove(
