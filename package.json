@@ -1,0 +1,20 @@
+{
+  "name": "production-analyzer-kep",
+  "productName": "Production Analyzer Kep",
+  "version": "1.0.0",
+  "description": "Software per analisi degli Ordini di Conto Lavoro e dei costi di produzione.",
+  "main": "main.cjs",
+  "author": "Fabio Filippini",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.11.2",
+    "@electron-forge/maker-squirrel": "^7.11.2",
+    "@electron-forge/maker-zip": "^7.11.2",
+    "electron": "^43.4.1"
+  }
+}
