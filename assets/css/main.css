@@ -1438,3 +1438,9 @@ tbody tr:hover {
     }
 
 }
+
+.sidebar-footer .developer-credit {
+    margin-top: 4px;
+    color: #4ff9ff;
+    font-size: 11px;
+}
