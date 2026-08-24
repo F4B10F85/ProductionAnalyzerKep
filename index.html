@@ -1062,6 +1062,85 @@
 
                 </section>
 
+                <!-- =================================================
+                    GRAFICI
+                    ================================================= -->
+
+                <section class="analysis-panel charts-panel">
+
+                    <div class="panel-title">
+                        GRAFICI ANALISI PRODUZIONE
+                    </div>
+
+
+                    <div class="charts-grid">
+
+
+                        <!-- PRODUZIONE PER FAMIGLIA -->
+
+                        <div class="chart-card">
+
+                            <div class="chart-card-title">
+                                PRODUZIONE PER FAMIGLIA
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="chartFamilyQuantity"></canvas>
+                            </div>
+
+                        </div>
+
+
+                        <!-- LAVORAZIONE PER FAMIGLIA -->
+
+                        <div class="chart-card">
+
+                            <div class="chart-card-title">
+                                LAVORAZIONE PER FAMIGLIA
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="chartFamilyValue"></canvas>
+                            </div>
+
+                        </div>
+
+
+                        <!-- LAVORAZIONE PER ODCL -->
+
+                        <div class="chart-card">
+
+                            <div class="chart-card-title">
+                                LAVORAZIONE PER ODCL
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="chartODCLValue"></canvas>
+                            </div>
+
+                        </div>
+
+
+                        <!-- ANDAMENTO MENSILE -->
+
+                        <div class="chart-card">
+
+                            <div class="chart-card-title">
+                                ANDAMENTO MENSILE DELLA LAVORAZIONE
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="chartMonthlyValue"></canvas>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
             </section>
 
 
@@ -1078,6 +1157,13 @@
         src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"
     ></script>
 
+    <!-- =====================================================
+         LIBRERIA GRAFICI
+         ===================================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 
     <!-- =====================================================
          JAVASCRIPT
@@ -1087,6 +1173,7 @@
     <script src="assets/js/storage.js"></script>
     <script src="assets/js/classifier.js"></script>
     <script src="assets/js/analysis.js"></script>
+    <script src="assets/js/charts.js"></script>
     <script src="assets/js/app.js"></script>
 
 
