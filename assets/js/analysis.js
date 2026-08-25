@@ -181,7 +181,7 @@ function populateODCLSelect() {
 
     select.innerHTML = `
         <option value="">
-            Seleziona ODCL
+            Seleziona OdCL
         </option>
     `;
 
@@ -1231,7 +1231,7 @@ function renderMonthlyODCL(
 
     setText(
         "monthlyODCLTitle",
-        `RIEPILOGO PER ODCL - ${getMonthName(month).toUpperCase()} ${year} (escluso POLO per quantità)`
+        `RIEPILOGO PER OdCL - ${getMonthName(month).toUpperCase()} ${year} (escluso POLO per quantità)`
     );
 
 }
@@ -1548,7 +1548,7 @@ function renderEmptyODCL() {
 
     setText(
         "odclResultTitle",
-        "SELEZIONA UN ODCL"
+        "SELEZIONA UN OdCL"
     );
 
 
@@ -1661,7 +1661,7 @@ function renderEmptyMonthly() {
 
     setText(
         "monthlyODCLTitle",
-        "RIEPILOGO PER ODCL"
+        "RIEPILOGO PER OdCL"
     );
 
 }
