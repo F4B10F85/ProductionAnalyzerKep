@@ -860,8 +860,6 @@ refreshArchiveButton.addEventListener(
 );
 
 
-loadArchive();
-
 /*
 |--------------------------------------------------------------------------
 | Avvio analisi

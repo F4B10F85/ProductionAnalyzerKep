@@ -4,9 +4,10 @@
 |--------------------------------------------------------------------------
 | Production Analyzer Kep
 |--------------------------------------------------------------------------
-| Connessione Firebase / Firestore
+| Firebase App + Firestore + Authentication
 |--------------------------------------------------------------------------
 */
+
 
 const firebaseConfig = {
 
@@ -58,11 +59,17 @@ const firestore =
 
 /*
 |--------------------------------------------------------------------------
-| Esportazione globale
+| Authentication
 |--------------------------------------------------------------------------
-|
-| Manteniamo una piccola API globale per non dover trasformare
-| tutto il progetto in moduli ES contemporaneamente.
+*/
+
+const firebaseAuth =
+    firebase.auth();
+
+
+/*
+|--------------------------------------------------------------------------
+| API globale
 |--------------------------------------------------------------------------
 */
 
@@ -73,6 +80,9 @@ window.KepFirebase = {
 
     db:
         firestore,
+
+    auth:
+        firebaseAuth,
 
     firebase:
         firebase

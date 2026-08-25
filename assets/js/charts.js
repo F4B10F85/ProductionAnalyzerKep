@@ -61,16 +61,7 @@ const CHART_FAMILY_LABELS = [
 ];
 
 
-/*
-|--------------------------------------------------------------------------
-| Inizializzazione
-|--------------------------------------------------------------------------
-*/
 
-document.addEventListener(
-    "DOMContentLoaded",
-    initializeCharts
-);
 
 
 async function initializeCharts() {
