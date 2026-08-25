@@ -31,11 +31,7 @@ body {
 }
 
 body {
-    font-family:
-        "Segoe UI",
-        Inter,
-        Arial,
-        sans-serif;
+    font-family: "Ebrima", "Segoe UI", Arial, sans-serif;
 
     color: var(--text);
     background: var(--page);

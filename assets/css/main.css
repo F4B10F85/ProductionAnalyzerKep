@@ -34,11 +34,7 @@ body {
 
 
 body {
-    font-family:
-        "Segoe UI",
-        Inter,
-        Arial,
-        sans-serif;
+    font-family: "Ebrima";
 
     color: var(--text);
     background: var(--page);
