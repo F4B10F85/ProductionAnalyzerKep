@@ -4,128 +4,40 @@
 |--------------------------------------------------------------------------
 | Production Analyzer Kep
 |--------------------------------------------------------------------------
-| Persistenza locale dei dati tramite IndexedDB.
+| Persistenza centrale tramite Firebase Cloud Firestore.
 |--------------------------------------------------------------------------
 */
 
-const DATABASE_NAME = "ProductionAnalyzerKep";
-const DATABASE_VERSION = 1;
 
-const IMPORTS_STORE = "imports";
-const RECORDS_STORE = "records";
+const IMPORTS_COLLECTION =
+    "imports";
+
+
+const RECORDS_COLLECTION =
+    "records";
 
 
 /*
 |--------------------------------------------------------------------------
-| Apertura database
+| Controllo connessione
 |--------------------------------------------------------------------------
 */
 
-function openDatabase() {
+function getFirestore() {
 
-    return new Promise((resolve, reject) => {
+    if (
+        !window.KepFirebase ||
+        !window.KepFirebase.db
+    ) {
 
-        const request =
-            indexedDB.open(
-                DATABASE_NAME,
-                DATABASE_VERSION
-            );
+        throw new Error(
+            "Firebase / Firestore non è stato inizializzato."
+        );
 
-
-        request.onupgradeneeded = event => {
-
-            const database =
-                event.target.result;
+    }
 
 
-            /*
-             * Tabella importazioni
-             */
-
-            if (
-                !database.objectStoreNames.contains(
-                    IMPORTS_STORE
-                )
-            ) {
-
-                database.createObjectStore(
-                    IMPORTS_STORE,
-                    {
-                        keyPath: "importId"
-                    }
-                );
-
-            }
-
-
-            /*
-             * Tabella record
-             */
-
-            if (
-                !database.objectStoreNames.contains(
-                    RECORDS_STORE
-                )
-            ) {
-
-                const recordsStore =
-                    database.createObjectStore(
-                        RECORDS_STORE,
-                        {
-                            keyPath: "id"
-                        }
-                    );
-
-
-                recordsStore.createIndex(
-                    "importId",
-                    "importId",
-                    {
-                        unique: false
-                    }
-                );
-
-
-                recordsStore.createIndex(
-                    "odcl",
-                    "odcl",
-                    {
-                        unique: false
-                    }
-                );
-
-
-                recordsStore.createIndex(
-                    "codice",
-                    "codice",
-                    {
-                        unique: false
-                    }
-                );
-
-            }
-
-        };
-
-
-        request.onsuccess = event => {
-
-            resolve(
-                event.target.result
-            );
-
-        };
-
-
-        request.onerror = event => {
-
-            reject(
-                event.target.error
-            );
-
-        };
-
-    });
+    return window.KepFirebase.db;
 
 }
 
@@ -136,7 +48,9 @@ function openDatabase() {
 |--------------------------------------------------------------------------
 */
 
-async function saveImport(importData) {
+async function saveImport(
+    importData
+) {
 
     if (!importData) {
 
@@ -147,109 +61,115 @@ async function saveImport(importData) {
     }
 
 
-    const database =
-        await openDatabase();
+    const db =
+        getFirestore();
 
 
-    return new Promise(
-        (resolve, reject) => {
+    /*
+     * Documento importazione
+     */
 
-            const transaction =
-                database.transaction(
-                    [
-                        IMPORTS_STORE,
-                        RECORDS_STORE
-                    ],
-                    "readwrite"
-                );
+    await db
+        .collection(
+            IMPORTS_COLLECTION
+        )
+        .doc(
+            importData.importId
+        )
+        .set({
 
+            importId:
+                importData.importId,
 
-            const importsStore =
-                transaction.objectStore(
-                    IMPORTS_STORE
-                );
+            odcl:
+                String(
+                    importData.odcl
+                ),
 
+            fileName:
+                importData.fileName,
 
-            const recordsStore =
-                transaction.objectStore(
-                    RECORDS_STORE
-                );
+            sheetName:
+                importData.sheetName,
 
+            importedAt:
+                firebase.firestore.Timestamp.fromDate(
+                    new Date(
+                        importData.importedAt
+                    )
+                ),
 
-            /*
-             * Salviamo i dati generali
-             * dell'importazione.
-             */
-
-            importsStore.put({
-
-                importId:
-                    importData.importId,
-
-                odcl:
-                    importData.odcl,
-
-                fileName:
-                    importData.fileName,
-
-                sheetName:
-                    importData.sheetName,
-
-                importedAt:
-                    importData.importedAt,
-
-                rowCount:
+            rowCount:
+                Number(
                     importData.rowCount
+                )
 
-            });
+        });
 
 
-            /*
-             * Salviamo tutte le righe.
-             *
-             * IMPORTANTE:
-             * ogni record contiene già:
-             *
-             * - dati originali
-             * - classificazione
-             * - valore lavorazione
-             *
-             */
+    /*
+     * Documenti delle righe
+     */
 
-            importData.records.forEach(
-                record => {
+    /*
+     * Firestore consente massimo 500 operazioni
+     * in una singola batch.
+     *
+     * Usiamo blocchi da 450 per stare tranquilli.
+     */
 
-                    recordsStore.put(
-                        record
-                    );
+    const batchSize =
+        450;
 
-                }
+
+    for (
+        let start = 0;
+        start < importData.records.length;
+        start += batchSize
+    ) {
+
+        const batch =
+            db.batch();
+
+
+        const recordsChunk =
+            importData.records.slice(
+                start,
+                start + batchSize
             );
 
 
-            transaction.oncomplete = () => {
+        recordsChunk.forEach(
+            record => {
 
-                database.close();
+                const recordRef =
+                    db
+                        .collection(
+                            RECORDS_COLLECTION
+                        )
+                        .doc(
+                            record.id
+                        );
 
-                resolve(
-                    importData.importId
+
+                batch.set(
+                    recordRef,
+                    record
                 );
 
-            };
+            }
+        );
 
 
-            transaction.onerror = event => {
+        await batch.commit();
 
-                database.close();
+    }
 
-                reject(
-                    event.target.error
-                );
 
-            };
-
-        }
+    return (
+        importData.importId
     );
+
 }
 
 
@@ -261,249 +181,67 @@ async function saveImport(importData) {
 
 async function getAllImports() {
 
-    const database =
-        await openDatabase();
+    const db =
+        getFirestore();
 
 
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                database.transaction(
-                    IMPORTS_STORE,
-                    "readonly"
-                );
+    const snapshot =
+        await db
+            .collection(
+                IMPORTS_COLLECTION
+            )
+            .get();
 
 
-            const store =
-                transaction.objectStore(
-                    IMPORTS_STORE
-                );
+    return snapshot.docs.map(
+        document => {
+
+            const data =
+                document.data();
 
 
-            const request =
-                store.getAll();
+            return {
 
+                ...data,
 
-            request.onsuccess = () => {
-
-                database.close();
-
-                resolve(
-                    request.result
-                );
-
-            };
-
-
-            request.onerror = event => {
-
-                database.close();
-
-                reject(
-                    event.target.error
-                );
+                importedAt:
+                    convertFirestoreDate(
+                        data.importedAt
+                    )
 
             };
 
         }
     );
+
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| Recupero singola importazione
-|--------------------------------------------------------------------------
-*/
-
-async function getImportById(importId) {
-
-    if (!importId) {
-
-        throw new Error(
-            "ID importazione non specificato."
-        );
-
-    }
-
-
-    const database =
-        await openDatabase();
-
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                database.transaction(
-                    IMPORTS_STORE,
-                    "readonly"
-                );
-
-
-            const store =
-                transaction.objectStore(
-                    IMPORTS_STORE
-                );
-
-
-            const request =
-                store.get(importId);
-
-
-            request.onsuccess = () => {
-
-                database.close();
-
-                resolve(
-                    request.result || null
-                );
-
-            };
-
-
-            request.onerror = event => {
-
-                database.close();
-
-                reject(
-                    event.target.error
-                );
-
-            };
-
-        }
-    );
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Recupero record
+| Recupero tutti i record
 |--------------------------------------------------------------------------
 */
 
 async function getAllRecords() {
 
-    const database =
-        await openDatabase();
+    const db =
+        getFirestore();
 
 
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                database.transaction(
-                    RECORDS_STORE,
-                    "readonly"
-                );
+    const snapshot =
+        await db
+            .collection(
+                RECORDS_COLLECTION
+            )
+            .get();
 
 
-            const store =
-                transaction.objectStore(
-                    RECORDS_STORE
-                );
-
-
-            const request =
-                store.getAll();
-
-
-            request.onsuccess = () => {
-
-                database.close();
-
-                resolve(
-                    request.result
-                );
-
-            };
-
-
-            request.onerror = event => {
-
-                database.close();
-
-                reject(
-                    event.target.error
-                );
-
-            };
-
-        }
+    return snapshot.docs.map(
+        document =>
+            document.data()
     );
-}
 
-
-/*
-|--------------------------------------------------------------------------
-| Recupero record per importazione
-|--------------------------------------------------------------------------
-*/
-
-async function getRecordsByImportId(importId) {
-
-    if (!importId) {
-
-        throw new Error(
-            "ID importazione non specificato."
-        );
-
-    }
-
-
-    const database =
-        await openDatabase();
-
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                database.transaction(
-                    RECORDS_STORE,
-                    "readonly"
-                );
-
-
-            const store =
-                transaction.objectStore(
-                    RECORDS_STORE
-                );
-
-
-            const index =
-                store.index("importId");
-
-
-            const request =
-                index.getAll(importId);
-
-
-            request.onsuccess = () => {
-
-                database.close();
-
-                resolve(
-                    request.result
-                );
-
-            };
-
-
-            request.onerror = event => {
-
-                database.close();
-
-                reject(
-                    event.target.error
-                );
-
-            };
-
-        }
-    );
 }
 
 
@@ -513,7 +251,9 @@ async function getRecordsByImportId(importId) {
 |--------------------------------------------------------------------------
 */
 
-async function getRecordsByODCL(odcl) {
+async function getRecordsByODCL(
+    odcl
+) {
 
     if (!odcl) {
 
@@ -524,121 +264,42 @@ async function getRecordsByODCL(odcl) {
     }
 
 
-    const database =
-        await openDatabase();
+    const db =
+        getFirestore();
 
 
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                database.transaction(
-                    RECORDS_STORE,
-                    "readonly"
-                );
-
-
-            const store =
-                transaction.objectStore(
-                    RECORDS_STORE
-                );
-
-
-            const index =
-                store.index("odcl");
+    const snapshot =
+        await db
+            .collection(
+                RECORDS_COLLECTION
+            )
+            .where(
+                "odcl",
+                "==",
+                String(
+                    odcl
+                )
+            )
+            .get();
 
 
-            const request =
-                index.getAll(odcl);
-
-
-            request.onsuccess = () => {
-
-                database.close();
-
-                resolve(
-                    request.result
-                );
-
-            };
-
-
-            request.onerror = event => {
-
-                database.close();
-
-                reject(
-                    event.target.error
-                );
-
-            };
-
-        }
+    return snapshot.docs.map(
+        document =>
+            document.data()
     );
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Recupero importazione completa
-|--------------------------------------------------------------------------
-|
-| Restituisce:
-|
-| {
-|     importazione: {...},
-|     records: [...]
-| }
-|
-|--------------------------------------------------------------------------
-*/
-
-async function getCompleteImport(importId) {
-
-    const importData =
-        await getImportById(
-            importId
-        );
-
-
-    if (!importData) {
-
-        return null;
-
-    }
-
-
-    const records =
-        await getRecordsByImportId(
-            importId
-        );
-
-
-    return {
-
-        importazione:
-            importData,
-
-        records
-
-    };
 
 }
+
 
 /*
 |--------------------------------------------------------------------------
 | Eliminazione importazione
 |--------------------------------------------------------------------------
-|
-| Elimina:
-|
-| - dati generali dell'importazione
-| - tutte le righe associate
-|
-|--------------------------------------------------------------------------
 */
 
-async function deleteImport(importId) {
+async function deleteImport(
+    importId
+) {
 
     if (!importId) {
 
@@ -649,114 +310,118 @@ async function deleteImport(importId) {
     }
 
 
-    const database =
-        await openDatabase();
+    const db =
+        getFirestore();
 
 
-    return new Promise(
-        (resolve, reject) => {
+    /*
+     * Recuperiamo le righe associate.
+     */
 
-            const transaction =
-                database.transaction(
-                    [
-                        IMPORTS_STORE,
-                        RECORDS_STORE
-                    ],
-                    "readwrite"
+    const recordsSnapshot =
+        await db
+            .collection(
+                RECORDS_COLLECTION
+            )
+            .where(
+                "importId",
+                "==",
+                importId
+            )
+            .get();
+
+
+    /*
+     * Eliminiamo in blocchi.
+     */
+
+    const batchSize =
+        450;
+
+
+    for (
+        let start = 0;
+        start < recordsSnapshot.docs.length;
+        start += batchSize
+    ) {
+
+        const batch =
+            db.batch();
+
+
+        const docs =
+            recordsSnapshot.docs.slice(
+                start,
+                start + batchSize
+            );
+
+
+        docs.forEach(
+            document => {
+
+                batch.delete(
+                    document.ref
                 );
 
-
-            const importsStore =
-                transaction.objectStore(
-                    IMPORTS_STORE
-                );
+            }
+        );
 
 
-            const recordsStore =
-                transaction.objectStore(
-                    RECORDS_STORE
-                );
+        await batch.commit();
+
+    }
 
 
-            /*
-             * Eliminiamo tutte le righe
-             * appartenenti all'importazione.
-             */
+    /*
+     * Infine eliminiamo l'importazione.
+     */
 
-            const recordsIndex =
-                recordsStore.index(
-                    "importId"
-                );
-
-
-            const request =
-                recordsIndex.openCursor(
-                    IDBKeyRange.only(
-                        importId
-                    )
-                );
+    await db
+        .collection(
+            IMPORTS_COLLECTION
+        )
+        .doc(
+            importId
+        )
+        .delete();
 
 
-            request.onsuccess = event => {
+    return true;
 
-                const cursor =
-                    event.target.result;
-
-
-                if (cursor) {
-
-                    cursor.delete();
-
-                    cursor.continue();
-
-                    return;
-
-                }
+}
 
 
-                /*
-                 * Una volta eliminate
-                 * tutte le righe,
-                 * eliminiamo l'importazione.
-                 */
+/*
+|--------------------------------------------------------------------------
+| Conversione timestamp
+|--------------------------------------------------------------------------
+*/
 
-                importsStore.delete(
-                    importId
-                );
+function convertFirestoreDate(
+    value
+) {
 
-            };
+    if (
+        !value
+    ) {
 
+        return null;
 
-            request.onerror = event => {
-
-                reject(
-                    event.target.error
-                );
-
-            };
+    }
 
 
-            transaction.oncomplete = () => {
+    if (
+        typeof value.toDate ===
+        "function"
+    ) {
 
-                database.close();
+        return value
+            .toDate()
+            .toISOString();
 
-                resolve(
-                    true
-                );
-
-            };
+    }
 
 
-            transaction.onerror = event => {
+    return value;
 
-                database.close();
-
-                reject(
-                    event.target.error
-                );
-
-            };
-
-        }
-    );
 }

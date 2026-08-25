@@ -147,105 +147,13 @@ async function initializeAnalysisPage() {
 
 /*
 |--------------------------------------------------------------------------
-| IndexedDB
+| Recupero record
 |--------------------------------------------------------------------------
 */
 
-function getAnalysisRecords() {
+async function getAnalysisRecords() {
 
-    return new Promise(
-        (resolve, reject) => {
-
-            const request =
-                indexedDB.open(
-                    "ProductionAnalyzerKep",
-                    1
-                );
-
-
-            request.onerror = () => {
-
-                reject(
-                    request.error ||
-                    new Error(
-                        "Impossibile aprire il database locale."
-                    )
-                );
-
-            };
-
-
-            request.onsuccess = () => {
-
-                const database =
-                    request.result;
-
-
-                if (
-                    !database.objectStoreNames.contains(
-                        "records"
-                    )
-                ) {
-
-                    database.close();
-
-                    resolve([]);
-
-                    return;
-
-                }
-
-
-                const transaction =
-                    database.transaction(
-                        "records",
-                        "readonly"
-                    );
-
-
-                const store =
-                    transaction.objectStore(
-                        "records"
-                    );
-
-
-                const getAllRequest =
-                    store.getAll();
-
-
-                getAllRequest.onsuccess = () => {
-
-                    const records =
-                        getAllRequest.result || [];
-
-
-                    database.close();
-
-                    resolve(
-                        records
-                    );
-
-                };
-
-
-                getAllRequest.onerror = () => {
-
-                    const error =
-                        getAllRequest.error;
-
-
-                    database.close();
-
-                    reject(
-                        error
-                    );
-
-                };
-
-            };
-
-        }
-    );
+    return await getAllRecords();
 
 }
 

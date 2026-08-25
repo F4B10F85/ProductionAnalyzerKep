@@ -998,115 +998,13 @@ function destroyChart(
 
 /*
 |--------------------------------------------------------------------------
-| Lettura IndexedDB
+| Lettura record
 |--------------------------------------------------------------------------
 */
 
-function getChartRecords() {
+async function getChartRecords() {
 
-    return new Promise(
-        (
-            resolve,
-            reject
-        ) => {
-
-            const request =
-                indexedDB.open(
-                    "ProductionAnalyzerKep",
-                    1
-                );
-
-
-            request.onerror =
-                () => {
-
-                    reject(
-                        request.error ||
-                        new Error(
-                            "Impossibile leggere il database."
-                        )
-                    );
-
-                };
-
-
-            request.onsuccess =
-                () => {
-
-                    const db =
-                        request.result;
-
-
-                    if (
-                        !db.objectStoreNames.contains(
-                            "records"
-                        )
-                    ) {
-
-                        db.close();
-
-                        resolve([]);
-
-                        return;
-
-                    }
-
-
-                    const transaction =
-                        db.transaction(
-                            "records",
-                            "readonly"
-                        );
-
-
-                    const store =
-                        transaction.objectStore(
-                            "records"
-                        );
-
-
-                    const getAll =
-                        store.getAll();
-
-
-                    getAll.onsuccess =
-                        () => {
-
-                            const result =
-                                getAll.result ||
-                                [];
-
-
-                            db.close();
-
-
-                            resolve(
-                                result
-                            );
-
-                        };
-
-
-                    getAll.onerror =
-                        () => {
-
-                            const error =
-                                getAll.error;
-
-
-                            db.close();
-
-
-                            reject(
-                                error
-                            );
-
-                        };
-
-                };
-
-        }
-    );
+    return await getAllRecords();
 
 }
 
