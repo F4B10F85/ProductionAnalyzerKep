@@ -1027,7 +1027,7 @@ tbody tr:hover {
 .total-cell {
     color: #0b4ea2 !important;
 
-    background: #f7faff !important;
+    background: #eafaf2 !important;
 
     font-weight: 800 !important;
 }
@@ -1070,8 +1070,8 @@ tbody tr:hover {
 
 
 .kpi-icon {
-    width: 64px;
-    height: 64px;
+    width: 84px;
+    height: 84px;
 
     flex:
         0 0 auto;
@@ -1093,14 +1093,14 @@ tbody tr:hover {
 .production-icon {
     color: #1670d0;
 
-    background: #e2f0ff;
+    background: transparent;
 }
 
 
 .money-icon {
     color: #2ba65e;
 
-    background: #e1f5e8;
+    background: transparent;
 }
 
 
@@ -1635,4 +1635,23 @@ tbody tr:hover {
     height: auto;
 
     object-fit: contain;
+}
+
+.monthly-family-table tbody tr:nth-last-child(2) td {
+    background: #f2f6fc;
+    font-weight: 700;
+}
+
+.monthly-family-table tbody tr:last-child td {
+    background: #f9fddf;
+    font-weight: 700;
+}
+
+.kpi-icon img {
+    width: 74px;
+    height: 74px;
+
+    object-fit: contain;
+
+    display: block;
 }

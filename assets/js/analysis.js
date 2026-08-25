@@ -530,10 +530,7 @@ function renderMonthlyAnalysis() {
         )?.value || "";
 
 
-    if (
-        !year ||
-        !month
-    ) {
+    if (!year || !month) {
 
         renderEmptyMonthly();
 
@@ -565,51 +562,23 @@ function renderMonthlyAnalysis() {
     );
 
 
-    ANALYSIS_FAMILIES.forEach(
-        family => {
+    /*
+    |--------------------------------------------------------------------------
+    | Righe per ODCL + righe totali
+    |--------------------------------------------------------------------------
+    */
 
-            setText(
-                `monthly-q-${makeId(
-                    family.key
-                )}`,
-                formatNumber(
-                    totals.quantities[
-                        family.key
-                    ]
-                )
-            );
-
-
-            setText(
-                `monthly-v-${makeId(
-                    family.key
-                )}`,
-                formatCurrency(
-                    totals.values[
-                        family.key
-                    ]
-                )
-            );
-
-        }
+    renderMonthlyFamilyTable(
+        records,
+        totals
     );
 
 
-    setText(
-        "monthly-q-total",
-        formatNumber(
-            totals.productionQuantity
-        )
-    );
-
-
-    setText(
-        "monthly-v-total",
-        formatCurrency(
-            totals.totalValue
-        )
-    );
-
+    /*
+    |--------------------------------------------------------------------------
+    | Riepilogo ODCL inferiore
+    |--------------------------------------------------------------------------
+    */
 
     renderMonthlyODCL(
         records,
@@ -619,6 +588,417 @@ function renderMonthlyAnalysis() {
     );
 
 }
+
+/*
+|--------------------------------------------------------------------------
+| Tabella riepilogo per famiglia
+|--------------------------------------------------------------------------
+|
+| Mostra:
+|
+| 1. una riga per ogni ODCL del periodo;
+| 2. una riga finale Quantità;
+| 3. una riga finale Lavorazione (€).
+|
+| POLO:
+| - NON entra nei TOTALI delle quantità;
+| - entra normalmente nella Lavorazione.
+|--------------------------------------------------------------------------
+*/
+
+function renderMonthlyFamilyTable(
+    records,
+    overallTotals
+) {
+
+    const body =
+        document.getElementById(
+            "monthlyFamilyBody"
+        );
+
+
+    if (!body) {
+
+        return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Raggruppamento per ODCL
+    |--------------------------------------------------------------------------
+    */
+
+    const grouped =
+        new Map();
+
+
+    records.forEach(
+        record => {
+
+            const odcl =
+                String(
+                    record.odcl ?? ""
+                ).trim();
+
+
+            if (!odcl) {
+
+                return;
+
+            }
+
+
+            if (
+                !grouped.has(
+                    odcl
+                )
+            ) {
+
+                grouped.set(
+                    odcl,
+                    []
+                );
+
+            }
+
+
+            grouped
+                .get(odcl)
+                .push(record);
+
+        }
+    );
+
+
+    const sortedODCL =
+        [
+            ...grouped.keys()
+        ]
+        .sort(
+            (a, b) =>
+                a.localeCompare(
+                    b,
+                    "it",
+                    {
+                        numeric: true
+                    }
+                )
+        );
+
+
+    body.innerHTML = "";
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Una riga per ogni ODCL
+    |--------------------------------------------------------------------------
+    */
+
+    sortedODCL.forEach(
+        odcl => {
+
+            const odclTotals =
+                aggregateRecords(
+                    grouped.get(
+                        odcl
+                    )
+                );
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td class="row-label">
+                    ${escapeHtml(
+                        odcl
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        odclTotals.quantities[
+                            "END-FAST"
+                        ]
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        odclTotals.quantities[
+                            "E-LIGHT"
+                        ]
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        odclTotals.quantities[
+                            "SMART"
+                        ]
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        odclTotals.quantities[
+                            "KEPPY"
+                        ]
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        odclTotals.quantities[
+                            "CR 2.0 T"
+                        ]
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        odclTotals.quantities[
+                            "CR 2.0 S/B"
+                        ]
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        odclTotals.quantities[
+                            "NOVA"
+                        ]
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        odclTotals.quantities[
+                            "POLO"
+                        ]
+                    )}
+                </td>
+
+                <td class="total-cell">
+                    ${formatNumber(
+                        odclTotals.productionQuantity
+                    )}
+                </td>
+
+            `;
+
+
+            body.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Riga Quantità
+    |--------------------------------------------------------------------------
+    */
+
+    const quantityRow =
+        document.createElement(
+            "tr"
+        );
+
+
+    quantityRow.innerHTML = `
+
+        <td class="row-label">
+            Quantità
+        </td>
+
+        <td>
+            ${formatNumber(
+                overallTotals.quantities[
+                    "END-FAST"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatNumber(
+                overallTotals.quantities[
+                    "E-LIGHT"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatNumber(
+                overallTotals.quantities[
+                    "SMART"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatNumber(
+                overallTotals.quantities[
+                    "KEPPY"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatNumber(
+                overallTotals.quantities[
+                    "CR 2.0 T"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatNumber(
+                overallTotals.quantities[
+                    "CR 2.0 S/B"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatNumber(
+                overallTotals.quantities[
+                    "NOVA"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatNumber(
+                overallTotals.quantities[
+                    "POLO"
+                ]
+            )}
+        </td>
+
+        <td class="total-cell">
+            ${formatNumber(
+                overallTotals.productionQuantity
+            )}
+        </td>
+
+    `;
+
+
+    body.appendChild(
+        quantityRow
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Riga Lavorazione
+    |--------------------------------------------------------------------------
+    |
+    | Qui POLO È inclusa nel totale economico.
+    |--------------------------------------------------------------------------
+    */
+
+    const valueRow =
+        document.createElement(
+            "tr"
+        );
+
+
+    valueRow.innerHTML = `
+
+        <td class="row-label">
+            Lavorazione (€)
+        </td>
+
+        <td>
+            ${formatCurrency(
+                overallTotals.values[
+                    "END-FAST"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatCurrency(
+                overallTotals.values[
+                    "E-LIGHT"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatCurrency(
+                overallTotals.values[
+                    "SMART"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatCurrency(
+                overallTotals.values[
+                    "KEPPY"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatCurrency(
+                overallTotals.values[
+                    "CR 2.0 T"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatCurrency(
+                overallTotals.values[
+                    "CR 2.0 S/B"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatCurrency(
+                overallTotals.values[
+                    "NOVA"
+                ]
+            )}
+        </td>
+
+        <td>
+            ${formatCurrency(
+                overallTotals.values[
+                    "POLO"
+                ]
+            )}
+        </td>
+
+        <td class="total-cell">
+            ${formatCurrency(
+                overallTotals.totalValue
+            )}
+        </td>
+
+    `;
+
+
+    body.appendChild(
+        valueRow
+    );
+
+}
+
 
 
 /*
@@ -1255,7 +1635,7 @@ function renderEmptyMonthly() {
 
     const body =
         document.getElementById(
-            "monthlyODCLBody"
+            "monthlyFamilyBody"
         );
 
 
@@ -1266,7 +1646,7 @@ function renderEmptyMonthly() {
             <tr>
 
                 <td
-                    colspan="4"
+                    colspan="10"
                     class="empty-row"
                 >
                     Seleziona anno e mese.
