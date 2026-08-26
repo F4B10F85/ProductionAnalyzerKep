@@ -1713,3 +1713,48 @@ tbody tr:hover {
         default;
 
 }
+
+.monthly-odcl-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+
+.monthly-odcl-toggle {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #cfd5dc;
+    border-radius: 6px;
+
+    background: #ffffff;
+    color: #17202b;
+
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 600;
+
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+
+.monthly-odcl-toggle:hover {
+    background: #f1f4f7;
+}
+
+
+.monthly-odcl-toggle:active {
+    transform: scale(0.96);
+}
+
+
