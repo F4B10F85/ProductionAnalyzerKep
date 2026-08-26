@@ -1709,26 +1709,50 @@ function renderEmptyMonthly() {
         document.getElementById(
             "monthlyODCLTitle"
         );
-    
+
+
     if (title) {
-    
+
         const label =
             title.querySelector(
                 "span"
             );
-    
+
+
         if (label) {
-    
+
             label.textContent =
-                `RIEPILOGO PER ODCL - ${getMonthName(month).toUpperCase()} ${year} (escluso POLO per quantità)`;
-    
+                "RIEPILOGO PER ODCL";
+
         }
-    
+
     }
-    );
+
+
+    const toggle =
+        document.getElementById(
+            "monthlyODCLToggle"
+        );
+
+
+    if (toggle) {
+
+        monthlyODCLExpanded =
+            true;
+
+
+        toggle.textContent =
+            "−";
+
+
+        toggle.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+    }
 
 }
-
 
 /*
 |--------------------------------------------------------------------------
