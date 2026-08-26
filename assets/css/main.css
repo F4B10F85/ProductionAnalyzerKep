@@ -1651,3 +1651,65 @@ tbody tr:hover {
 
     display: block;
 }
+
+.logout-button {
+    margin-left: auto;
+
+    padding:
+        6px
+        14px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.35
+        );
+
+    border-radius:
+        6px;
+
+    background:
+        transparent;
+
+    color:
+        #ffffff;
+
+    font-family:
+        inherit;
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
+    cursor:
+        pointer;
+}
+
+
+.logout-button:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+
+}
+
+
+.logout-button:disabled {
+
+    opacity:
+        0.6;
+
+    cursor:
+        default;
+
+}
