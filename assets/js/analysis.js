@@ -560,15 +560,41 @@ function renderMonthlyAnalysis() {
         );
 
 
-    setText(
-        "monthlyFamilyTitle",
-        `RIEPILOGO PER FAMIGLIA - ${getMonthName(month).toUpperCase()} ${year}`
-    );
+    /*
+    |--------------------------------------------------------------------------
+    | Titolo RIEPILOGO PER FAMIGLIA
+    |--------------------------------------------------------------------------
+    | Aggiorniamo solo lo <span>, senza distruggere il pulsante + / −.
+    |--------------------------------------------------------------------------
+    */
+
+    const familyTitle =
+        document.getElementById(
+            "monthlyFamilyTitle"
+        );
+
+
+    if (familyTitle) {
+
+        const label =
+            familyTitle.querySelector(
+                "span"
+            );
+
+
+        if (label) {
+
+            label.textContent =
+                `RIEPILOGO PER FAMIGLIA - ${getMonthName(month).toUpperCase()} ${year}`;
+
+        }
+
+    }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Righe per ODCL + righe totali
+    | Tabella RIEPILOGO PER FAMIGLIA
     |--------------------------------------------------------------------------
     */
 
@@ -580,7 +606,7 @@ function renderMonthlyAnalysis() {
 
     /*
     |--------------------------------------------------------------------------
-    | Riepilogo ODCL inferiore
+    | Riepilogo ODCL
     |--------------------------------------------------------------------------
     */
 
@@ -1708,11 +1734,41 @@ function renderEmptyODCL() {
 
 function renderEmptyMonthly() {
 
-    setText(
-        "monthlyFamilyTitle",
-        "RIEPILOGO PER FAMIGLIA"
-    );
+    /*
+    |--------------------------------------------------------------------------
+    | Titolo RIEPILOGO PER FAMIGLIA
+    |--------------------------------------------------------------------------
+    */
 
+    const familyTitle =
+        document.getElementById(
+            "monthlyFamilyTitle"
+        );
+
+
+    if (familyTitle) {
+
+        const label =
+            familyTitle.querySelector(
+                "span"
+            );
+
+
+        if (label) {
+
+            label.textContent =
+                "RIEPILOGO PER FAMIGLIA";
+
+        }
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Azzeramento valori famiglia
+    |--------------------------------------------------------------------------
+    */
 
     ANALYSIS_FAMILIES.forEach(
         family => {
@@ -1754,7 +1810,7 @@ function renderEmptyMonthly() {
 
     /*
     |--------------------------------------------------------------------------
-    | Tabella riepilogo famiglia
+    | Corpo tabella famiglia
     |--------------------------------------------------------------------------
     */
 
@@ -1786,7 +1842,7 @@ function renderEmptyMonthly() {
 
     /*
     |--------------------------------------------------------------------------
-    | Titolo riepilogo ODCL
+    | Titolo RIEPILOGO ODCL
     |--------------------------------------------------------------------------
     */
 
@@ -1874,7 +1930,6 @@ function renderEmptyMonthly() {
     }
 
 }
-
 
 
 
