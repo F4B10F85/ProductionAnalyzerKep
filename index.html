@@ -126,8 +126,18 @@
 
         <header class="topbar">
 
-            Production Analyzer Kep
-
+            <span>
+                Production Analyzer Kep
+            </span>
+        
+            <button
+                id="logoutButton"
+                type="button"
+                class="logout-button"
+            >
+                ESCI
+            </button>
+        
         </header>
 
 
@@ -302,6 +312,27 @@
                         >
                             Seleziona file
                         </button>
+
+                        <button
+                            id="massImportButton"
+                            type="button"
+                            class="button-secondary"
+                        >
+                            Importazione massiva
+                        </button>
+                        
+                        <input
+                            id="massFileInput"
+                            type="file"
+                            accept=".xlsx,.xls"
+                            multiple
+                            hidden
+                        >
+                        
+                        <div
+                            id="massImportStatus"
+                            class="hidden"
+                        ></div>
 
 
                         <input
