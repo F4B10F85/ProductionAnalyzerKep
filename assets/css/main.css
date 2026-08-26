@@ -1810,3 +1810,53 @@ tbody tr:hover {
     background: #f1f4f7;
 }
 
+/* ------------------------------------------------------------
+   PULSANTI IMPORTAZIONE
+   ------------------------------------------------------------ */
+
+.import-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+#importButton {
+    background: #2878c8;
+}
+
+#importButton:hover:not(:disabled) {
+    background: #1d64aa;
+}
+
+#massImportButton {
+    background: #6c7d71;
+}
+
+#massImportButton:hover:not(:disabled) {
+    background: #565e64;
+}
+
+/* ------------------------------------------------------------
+   PULSANTI IMPORTAZIONE
+   ------------------------------------------------------------ */
+
+.drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#selectFileButton {
+    margin-top: 12px;
+}
+
+#massImportButton {
+    margin-top: 18px;
+    background: #c545bac2;
+    color: #ffffff;
+}
+
+#massImportButton:hover {
+    background: #565e64;
+}

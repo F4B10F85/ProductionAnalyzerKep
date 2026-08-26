@@ -1,6 +1,5 @@
 "use strict";
 
-
 let monthlyODCLExpanded = false;
 let monthlyFamilyExpanded = false;
 
@@ -99,6 +98,27 @@ let analysisRecords = [];
 |--------------------------------------------------------------------------
 */
 
+/*
+|--------------------------------------------------------------------------
+| Stato analisi
+|--------------------------------------------------------------------------
+*/
+
+let analysisInitialized = false;
+let analysisInitializationPromise = null;
+
+let currentMonthlyRecords = [];
+
+const monthlyRecordsCache = new Map();
+const odclRecordsCache = new Map();
+
+
+/*
+|--------------------------------------------------------------------------
+| Compatibilità con app.js
+|--------------------------------------------------------------------------
+*/
+
 async function initializeAnalysis() {
 
     await initializeAnalysisPage();
@@ -114,37 +134,81 @@ async function initializeAnalysis() {
 
 async function initializeAnalysisPage() {
 
-    try {
+    if (analysisInitialized) {
 
-        analysisRecords =
-            await getAnalysisRecords();
-
-
-        populateODCLSelect();
-
-        populateYearSelect();
-
-        populateMonthSelect();
-
-
-        renderEmptyODCL();
-
-        renderEmptyMonthly();
+        return;
 
     }
-    catch (error) {
-
-        console.error(
-            "Errore inizializzazione analisi:",
-            error
-        );
 
 
-        showPageError(
-            "Impossibile caricare i dati dell'archivio locale."
-        );
+    if (analysisInitializationPromise) {
+
+        return await analysisInitializationPromise;
 
     }
+
+
+    analysisInitializationPromise =
+        (async () => {
+
+            try {
+
+                const [
+                    imports,
+                    dateBounds
+                ] =
+                    await Promise.all([
+                        getAllImports(),
+                        getAnalysisDateBounds()
+                    ]);
+
+
+                populateODCLSelect(
+                    imports
+                );
+
+                populateYearSelect(
+                    dateBounds
+                );
+
+                populateMonthSelect();
+
+
+                renderEmptyODCL();
+
+                renderEmptyMonthly();
+
+
+                analysisInitialized =
+                    true;
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Errore inizializzazione analisi:",
+                    error
+                );
+
+
+                showPageError(
+                    "Impossibile caricare i dati dell'analisi."
+                );
+
+                throw error;
+
+            }
+            finally {
+
+                analysisInitializationPromise =
+                    null;
+
+            }
+
+        })();
+
+
+    return await analysisInitializationPromise;
 
 }
 
@@ -153,11 +217,33 @@ async function initializeAnalysisPage() {
 |--------------------------------------------------------------------------
 | Recupero record
 |--------------------------------------------------------------------------
+|
+| Non esegue più una lettura globale di Firestore.
+| Restituisce i record attualmente caricati per l'analisi mensile.
+|--------------------------------------------------------------------------
 */
 
 async function getAnalysisRecords() {
 
-    return await getAllRecords();
+    return currentMonthlyRecords;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Invalidazione cache analisi
+|--------------------------------------------------------------------------
+*/
+
+function invalidateAnalysisCache() {
+
+    monthlyRecordsCache.clear();
+    odclRecordsCache.clear();
+
+    currentMonthlyRecords = [];
+
+    analysisInitialized = false;
 
 }
 
@@ -168,7 +254,9 @@ async function getAnalysisRecords() {
 |--------------------------------------------------------------------------
 */
 
-function populateODCLSelect() {
+function populateODCLSelect(
+    imports = []
+) {
 
     const select =
         document.getElementById(
@@ -193,11 +281,11 @@ function populateODCLSelect() {
     const odcls =
         [
             ...new Set(
-                analysisRecords
+                imports
                     .map(
-                        record =>
+                        item =>
                             String(
-                                record.odcl ?? ""
+                                item?.odcl ?? ""
                             ).trim()
                     )
                     .filter(Boolean)
@@ -241,9 +329,9 @@ function populateODCLSelect() {
 
 
     select.onchange =
-        () => {
+        async () => {
 
-            renderODCLAnalysis(
+            await renderODCLAnalysis(
                 select.value
             );
 
@@ -258,7 +346,9 @@ function populateODCLSelect() {
 |--------------------------------------------------------------------------
 */
 
-function populateYearSelect() {
+function populateYearSelect(
+    dateBounds = null
+) {
 
     const select =
         document.getElementById(
@@ -273,6 +363,10 @@ function populateYearSelect() {
     }
 
 
+    const currentValue =
+        select.value;
+
+
     select.innerHTML = `
         <option value="">
             Anno
@@ -280,50 +374,77 @@ function populateYearSelect() {
     `;
 
 
-    const years =
-        [
-            ...new Set(
-                analysisRecords
-                    .map(
-                        getRecordYear
-                    )
-                    .filter(Boolean)
-            )
-        ]
-        .sort(
-            (a, b) =>
-                Number(b) -
-                Number(a)
+    if (
+        !dateBounds?.minYear ||
+        !dateBounds?.maxYear
+    ) {
+
+        select.onchange =
+            () => renderMonthlyAnalysis();
+
+        return;
+
+    }
+
+
+    const minYear =
+        Number(
+            dateBounds.minYear
         );
 
 
-    years.forEach(
-        year => {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
+    const maxYear =
+        Number(
+            dateBounds.maxYear
+        );
 
 
-            option.value =
-                year;
+    for (
+        let year = maxYear;
+        year >= minYear;
+        year--
+    ) {
 
-
-            option.textContent =
-                year;
-
-
-            select.appendChild(
-                option
+        const option =
+            document.createElement(
+                "option"
             );
 
-        }
-    );
+
+        option.value =
+            String(year);
+
+
+        option.textContent =
+            String(year);
+
+
+        select.appendChild(
+            option
+        );
+
+    }
+
+
+    if (
+        currentValue &&
+        select.querySelector(
+            `option[value="${currentValue}"]`
+        )
+    ) {
+
+        select.value =
+            currentValue;
+
+    }
 
 
     select.onchange =
-        renderMonthlyAnalysis;
+        async () => {
+
+            await renderMonthlyAnalysis();
+
+        };
 
 }
 
@@ -386,7 +507,57 @@ function populateMonthSelect() {
 
 
     select.onchange =
-        renderMonthlyAnalysis;
+        async () => {
+
+            await renderMonthlyAnalysis();
+
+        };
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Intervallo mese
+|--------------------------------------------------------------------------
+*/
+
+function getMonthDateRange(
+    year,
+    month
+) {
+
+    const numericYear =
+        Number(year);
+
+    const numericMonth =
+        Number(month);
+
+
+    const start =
+        `${numericYear}-${String(numericMonth).padStart(2, "0")}-01`;
+
+
+    const nextYear =
+        numericMonth === 12
+            ? numericYear + 1
+            : numericYear;
+
+
+    const nextMonth =
+        numericMonth === 12
+            ? 1
+            : numericMonth + 1;
+
+
+    const end =
+        `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+
+
+    return {
+        start,
+        end
+    };
 
 }
 
@@ -410,106 +581,160 @@ function renderODCLAnalysis(
     }
 
 
-    const records =
-        analysisRecords.filter(
-            record =>
-                String(
-                    record.odcl ?? ""
-                ) ===
-                String(odcl)
-        );
+    const year =
+        document.getElementById(
+            "analysisYear"
+        )?.value || "";
 
 
-    const totals =
-        aggregateRecords(
-            records
-        );
+    const cacheKey =
+        `${year || "ALL"}|${odcl}`;
 
 
-    setText(
-        "odclResultTitle",
-        `RISULTATO ODCL ${odcl}`
-    );
-
-
-    setFamilyValue(
-        "odcl-end-fast",
-        totals.quantities[
-            "END-FAST"
-        ]
-    );
-
-
-    setFamilyValue(
-        "odcl-e-light",
-        totals.quantities[
-            "E-LIGHT"
-        ]
-    );
-
-
-    setFamilyValue(
-        "odcl-smart",
-        totals.quantities[
-            "SMART"
-        ]
-    );
-
-
-    setFamilyValue(
-        "odcl-keppy",
-        totals.quantities[
-            "KEPPY"
-        ]
-    );
-
-
-    setFamilyValue(
-        "odcl-cr20t",
-        totals.quantities[
-            "CR 2.0 T"
-        ]
-    );
-
-
-    setFamilyValue(
-        "odcl-cr20sb",
-        totals.quantities[
-            "CR 2.0 S/B"
-        ]
-    );
-
-
-    setFamilyValue(
-        "odcl-nova",
-        totals.quantities[
-            "NOVA"
-        ]
-    );
-
-
-    setFamilyValue(
-        "odcl-polo",
-        totals.quantities[
-            "POLO"
-        ]
-    );
-
-
-    setText(
-        "odcl-total-quantity",
-        formatNumber(
-            totals.productionQuantity
+    const loadRecords =
+        odclRecordsCache.has(
+            cacheKey
         )
-    );
+            ? Promise.resolve(
+                odclRecordsCache.get(
+                    cacheKey
+                )
+            )
+            : getRecordsByODCL(
+                odcl
+            )
+                .then(
+                    records => {
+
+                        const filtered =
+                            year
+                                ? records.filter(
+                                    record =>
+                                        getRecordYear(record) ===
+                                        String(year)
+                                )
+                                : records;
+
+                        odclRecordsCache.set(
+                            cacheKey,
+                            filtered
+                        );
+
+                        return filtered;
+
+                    }
+                );
 
 
-    setText(
-        "odcl-total-value",
-        formatCurrency(
-            totals.totalValue
+    loadRecords
+        .then(
+            records => {
+
+                const totals =
+                    aggregateRecords(
+                        records
+                    );
+
+
+                setText(
+                    "odclResultTitle",
+                    year
+                        ? `RISULTATO ODCL ${odcl} - ${year}`
+                        : `RISULTATO ODCL ${odcl}`
+                );
+
+
+                setFamilyValue(
+                    "odcl-end-fast",
+                    totals.quantities[
+                        "END-FAST"
+                    ]
+                );
+
+
+                setFamilyValue(
+                    "odcl-e-light",
+                    totals.quantities[
+                        "E-LIGHT"
+                    ]
+                );
+
+
+                setFamilyValue(
+                    "odcl-smart",
+                    totals.quantities[
+                        "SMART"
+                    ]
+                );
+
+
+                setFamilyValue(
+                    "odcl-keppy",
+                    totals.quantities[
+                        "KEPPY"
+                    ]
+                );
+
+
+                setFamilyValue(
+                    "odcl-cr20t",
+                    totals.quantities[
+                        "CR 2.0 T"
+                    ]
+                );
+
+
+                setFamilyValue(
+                    "odcl-cr20sb",
+                    totals.quantities[
+                        "CR 2.0 S/B"
+                    ]
+                );
+
+
+                setFamilyValue(
+                    "odcl-nova",
+                    totals.quantities[
+                        "NOVA"
+                    ]
+                );
+
+
+                setFamilyValue(
+                    "odcl-polo",
+                    totals.quantities[
+                        "POLO"
+                    ]
+                );
+
+
+                setText(
+                    "odcl-total-quantity",
+                    formatNumber(
+                        totals.productionQuantity
+                    )
+                );
+
+
+                setText(
+                    "odcl-total-value",
+                    formatCurrency(
+                        totals.totalValue
+                    )
+                );
+
+            }
         )
-    );
+        .catch(
+            error => {
+
+                console.error(
+                    "Errore analisi ODCL:",
+                    error
+                );
+
+            }
+        );
 
 }
 
@@ -543,79 +768,128 @@ function renderMonthlyAnalysis() {
     }
 
 
-    const records =
-        analysisRecords.filter(
-            record =>
-                isRecordInPeriod(
-                    record,
+    const {
+        start,
+        end
+    } =
+        getMonthDateRange(
+            year,
+            month
+        );
+
+
+    const cacheKey =
+        `${start}|${end}`;
+
+
+    const loadRecords =
+        monthlyRecordsCache.has(
+            cacheKey
+        )
+            ? Promise.resolve(
+                monthlyRecordsCache.get(
+                    cacheKey
+                )
+            )
+            : getRecordsByDateRange(
+                start,
+                end
+            )
+                .then(
+                    records => {
+
+                        monthlyRecordsCache.set(
+                            cacheKey,
+                            records
+                        );
+
+                        return records;
+
+                    }
+                );
+
+
+    loadRecords
+        .then(
+            records => {
+
+                currentMonthlyRecords =
+                    records;
+
+
+                const totals =
+                    aggregateRecords(
+                        records
+                    );
+
+
+                const familyTitle =
+                    document.getElementById(
+                        "monthlyFamilyTitle"
+                    );
+
+
+                if (familyTitle) {
+
+                    const label =
+                        familyTitle.querySelector(
+                            "span"
+                        );
+
+
+                    if (label) {
+
+                        label.textContent =
+                            `RIEPILOGO PER FAMIGLIA - ${getMonthName(month).toUpperCase()} ${year}`;
+
+                    }
+
+                }
+
+
+                renderMonthlyFamilyTable(
+                    records,
+                    totals
+                );
+
+
+                renderMonthlyODCL(
+                    records,
+                    totals.totalValue,
                     year,
                     month
-                )
+                );
+
+
+                if (
+                    typeof updateChartsFromAnalysisData ===
+                    "function"
+                ) {
+
+                    updateChartsFromAnalysisData(
+                        records,
+                        year,
+                        month
+                    );
+
+                }
+
+            }
+        )
+        .catch(
+            error => {
+
+                console.error(
+                    "Errore analisi mensile:",
+                    error
+                );
+
+                showPageError(
+                    "Impossibile caricare i dati del periodo selezionato."
+                );
+
+            }
         );
-
-
-    const totals =
-        aggregateRecords(
-            records
-        );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Titolo RIEPILOGO PER FAMIGLIA
-    |--------------------------------------------------------------------------
-    | Aggiorniamo solo lo <span>, senza distruggere il pulsante + / −.
-    |--------------------------------------------------------------------------
-    */
-
-    const familyTitle =
-        document.getElementById(
-            "monthlyFamilyTitle"
-        );
-
-
-    if (familyTitle) {
-
-        const label =
-            familyTitle.querySelector(
-                "span"
-            );
-
-
-        if (label) {
-
-            label.textContent =
-                `RIEPILOGO PER FAMIGLIA - ${getMonthName(month).toUpperCase()} ${year}`;
-
-        }
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Tabella RIEPILOGO PER FAMIGLIA
-    |--------------------------------------------------------------------------
-    */
-
-    renderMonthlyFamilyTable(
-        records,
-        totals
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Riepilogo ODCL
-    |--------------------------------------------------------------------------
-    */
-
-    renderMonthlyODCL(
-        records,
-        totals.totalValue,
-        year,
-        month
-    );
 
 }
 
@@ -714,12 +988,6 @@ function renderMonthlyFamilyTable(
 
     body.innerHTML = "";
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Righe singoli ODCL
-    |--------------------------------------------------------------------------
-    */
 
     sortedODCL.forEach(
         odcl => {
@@ -894,12 +1162,6 @@ function renderMonthlyFamilyTable(
     );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Riga Quantità
-    |--------------------------------------------------------------------------
-    */
-
     const quantityRow =
         document.createElement(
             "tr"
@@ -1056,12 +1318,6 @@ function renderMonthlyFamilyTable(
         quantityRow
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Riga Lavorazione
-    |--------------------------------------------------------------------------
-    */
 
     const valueRow =
         document.createElement(
@@ -1220,12 +1476,6 @@ function renderMonthlyFamilyTable(
     );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Stato iniziale: righe compresse
-    |--------------------------------------------------------------------------
-    */
-
     monthlyFamilyExpanded =
         false;
 
@@ -1266,8 +1516,6 @@ function renderMonthlyFamilyTable(
     }
 
 }
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -1372,6 +1620,20 @@ function renderMonthlyODCL(
             </tr>
         `;
 
+        const toggle =
+            document.getElementById(
+                "monthlyODCLToggle"
+            );
+
+        if (toggle) {
+            monthlyODCLExpanded = false;
+            toggle.textContent = "+";
+            toggle.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+        }
+
         return;
 
     }
@@ -1418,6 +1680,10 @@ function renderMonthlyODCL(
 
             row.className =
                 "monthly-odcl-detail-row";
+
+            row.classList.add(
+                "hidden"
+            );
 
 
             row.innerHTML = `
@@ -1564,58 +1830,30 @@ function renderMonthlyODCL(
 
     }
 
+
+    monthlyODCLExpanded =
+        false;
+
+
+    const toggle =
+        document.getElementById(
+            "monthlyODCLToggle"
+        );
+
+
+    if (toggle) {
+
+        toggle.textContent =
+            "+";
+
+        toggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    }
+
 }
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        const button =
-            document.getElementById(
-                "monthlyODCLToggle"
-            );
-
-
-        if (!button) {
-
-            return;
-
-        }
-
-
-        button.addEventListener(
-            "click",
-            toggleMonthlyODCLRows
-        );
-
-    }
-);
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        const button =
-            document.getElementById(
-                "monthlyFamilyToggle"
-            );
-
-
-        if (!button) {
-
-            return;
-
-        }
-
-
-        button.addEventListener(
-            "click",
-            toggleMonthlyFamilyRows
-        );
-
-    }
-);
-
 
 /*
 |--------------------------------------------------------------------------
@@ -1966,13 +2204,8 @@ function renderEmptyODCL() {
 
 }
 
-function renderEmptyMonthly() {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Titolo RIEPILOGO PER FAMIGLIA
-    |--------------------------------------------------------------------------
-    */
+function renderEmptyMonthly() {
 
     const familyTitle =
         document.getElementById(
@@ -1997,12 +2230,6 @@ function renderEmptyMonthly() {
 
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Azzeramento valori famiglia
-    |--------------------------------------------------------------------------
-    */
 
     ANALYSIS_FAMILIES.forEach(
         family => {
@@ -2042,12 +2269,6 @@ function renderEmptyMonthly() {
     );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Corpo tabella famiglia
-    |--------------------------------------------------------------------------
-    */
-
     const familyBody =
         document.getElementById(
             "monthlyFamilyBody"
@@ -2074,12 +2295,6 @@ function renderEmptyMonthly() {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Titolo RIEPILOGO ODCL
-    |--------------------------------------------------------------------------
-    */
-
     const odclTitle =
         document.getElementById(
             "monthlyODCLTitle"
@@ -2104,11 +2319,12 @@ function renderEmptyMonthly() {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Reset pulsante RIEPILOGO FAMIGLIA
-    |--------------------------------------------------------------------------
-    */
+    monthlyFamilyExpanded =
+        false;
+
+    monthlyODCLExpanded =
+        false;
+
 
     const familyToggle =
         document.getElementById(
@@ -2118,13 +2334,8 @@ function renderEmptyMonthly() {
 
     if (familyToggle) {
 
-        monthlyFamilyExpanded =
-            false;
-
-
         familyToggle.textContent =
             "+";
-
 
         familyToggle.setAttribute(
             "aria-expanded",
@@ -2134,12 +2345,6 @@ function renderEmptyMonthly() {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Reset pulsante RIEPILOGO ODCL
-    |--------------------------------------------------------------------------
-    */
-
     const odclToggle =
         document.getElementById(
             "monthlyODCLToggle"
@@ -2148,13 +2353,8 @@ function renderEmptyMonthly() {
 
     if (odclToggle) {
 
-        monthlyODCLExpanded =
-            false;
-
-
         odclToggle.textContent =
             "+";
-
 
         odclToggle.setAttribute(
             "aria-expanded",
@@ -2164,8 +2364,6 @@ function renderEmptyMonthly() {
     }
 
 }
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -2232,21 +2430,15 @@ function formatNumber(
     value
 ) {
 
-    const number =
-        Number(
-            value || 0
-        );
-
-
-    return number
-        .toLocaleString(
-            "it-IT",
-            {
-                useGrouping: true,
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }
-        );
+    return Number(
+        value || 0
+    )
+    .toLocaleString(
+        "it-IT",
+        {
+            maximumFractionDigits: 2
+        }
+    );
 
 }
 
@@ -2255,22 +2447,18 @@ function formatCurrency(
     value
 ) {
 
-    const number =
-        Number(
-            value || 0
-        );
-
-
-    return number
-        .toLocaleString(
-            "it-IT",
-            {
-                useGrouping: true,
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }
-        )
-        + " €";
+    return Number(
+        value || 0
+    )
+    .toLocaleString(
+        "it-IT",
+        {
+            style: "currency",
+            currency: "EUR",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
+    );
 
 }
 
@@ -2473,3 +2661,47 @@ function toggleMonthlyFamilyRows() {
 
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| Inizializzazione pulsanti espansione
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const odclButton =
+            document.getElementById(
+                "monthlyODCLToggle"
+            );
+
+
+        if (odclButton) {
+
+            odclButton.addEventListener(
+                "click",
+                toggleMonthlyODCLRows
+            );
+
+        }
+
+
+        const familyButton =
+            document.getElementById(
+                "monthlyFamilyToggle"
+            );
+
+
+        if (familyButton) {
+
+            familyButton.addEventListener(
+                "click",
+                toggleMonthlyFamilyRows
+            );
+
+        }
+
+    }
+);

@@ -1,40 +1,28 @@
 "use strict";
 
-/*
-|--------------------------------------------------------------------------
-| Production Analyzer Kep
-|--------------------------------------------------------------------------
-| Grafici della pagina Analisi.
-| Usa gli stessi dati di IndexedDB e gli stessi filtri Anno/Mese/ODCL.
-|--------------------------------------------------------------------------
-*/
 
+let chartFamilyQuantity =
+    null;
 
-let chartFamilyQuantity = null;
+let chartFamilyValue =
+    null;
 
-let chartFamilyValue = null;
+let chartODCLValue =
+    null;
 
-let chartODCLValue = null;
-
-let chartMonthlyValue = null;
+let chartMonthlyValue =
+    null;
 
 
 const CHART_FAMILIES = [
 
     "END-FAST",
-
     "E-LIGHT",
-
     "SMART",
-
     "KEPPY",
-
     "CR 2.0 T",
-
     "CR 2.0 S/B",
-
     "NOVA",
-
     "POLO"
 
 ];
@@ -43,28 +31,43 @@ const CHART_FAMILIES = [
 const CHART_FAMILY_LABELS = [
 
     "END",
-
     "E-LIGHT",
-
     "SMART",
-
     "KEPPY",
-
     "CR 2.0 T",
-
     "CR 2.0 S/B",
-
     "NOVA",
-
     "POLO"
 
 ];
 
 
+let chartsInitialized =
+    false;
 
+
+/*
+|--------------------------------------------------------------------------
+| INIZIALIZZAZIONE
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeCharts
+);
 
 
 async function initializeCharts() {
+
+    if (
+        chartsInitialized
+    ) {
+
+        return;
+
+    }
+
 
     if (
         typeof Chart ===
@@ -127,6 +130,10 @@ async function initializeCharts() {
     );
 
 
+    chartsInitialized =
+        true;
+
+
     await updateCharts();
 
 }
@@ -134,87 +141,72 @@ async function initializeCharts() {
 
 /*
 |--------------------------------------------------------------------------
-| Aggiornamento grafici
+| AGGIORNAMENTO GRAFICI
 |--------------------------------------------------------------------------
 */
 
 async function updateCharts() {
 
+    const year =
+        document.getElementById(
+            "analysisYear"
+        )?.value || "";
+
+
+    const month =
+        document.getElementById(
+            "analysisMonth"
+        )?.value || "";
+
+
+    const odcl =
+        document.getElementById(
+            "analysisODCL"
+        )?.value || "";
+
+
+    if (
+        !year ||
+        !month
+    ) {
+
+        clearCharts();
+
+        return;
+
+    }
+
+
     try {
 
-        const records =
-            await getChartRecords();
-
-
-        const year =
-            document.getElementById(
-                "analysisYear"
-            )?.value || "";
-
-
-        const month =
-            document.getElementById(
-                "analysisMonth"
-            )?.value || "";
-
-
-        const odcl =
-            document.getElementById(
-                "analysisODCL"
-            )?.value || "";
-
-
-        /*
-         * Senza anno e mese
-         * non mostriamo dati inventati.
-         */
-
-        if (
-            !year ||
-            !month
-        ) {
-
-            clearAllCharts();
-
-            return;
-
-        }
-
-
-        /*
-         * Filtro temporale.
-         *
-         * La data utilizzata è:
-         *
-         * record.dataConsegna
-         *
-         * e NON la data di importazione.
-         */
-
-        const periodRecords =
-            records.filter(
-                record =>
-                    isInMonth(
-                        record,
-                        year,
-                        month
-                    )
+        const {
+            start,
+            end
+        } =
+            getChartMonthRange(
+                year,
+                month
             );
 
 
-        /*
-         * Se è stato selezionato un ODCL,
-         * filtriamo ulteriormente.
-         */
+        const periodRecords =
+            await getRecordsByDateRange(
+                start,
+                end
+            );
+
 
         const filteredRecords =
             odcl
                 ? periodRecords.filter(
                     record =>
                         String(
-                            record.odcl ?? ""
+                            record.odcl ??
+                            ""
                         ) ===
-                        String(odcl)
+                        String(
+                            odcl
+                        )
                 )
                 : periodRecords;
 
@@ -230,16 +222,25 @@ async function updateCharts() {
         );
 
 
+        const yearRecords =
+            await getRecordsByDateRange(
+                `${year}-01-01`,
+                `${Number(year) + 1}-01-01`
+            );
+
+
         renderMonthlyChart(
-            records,
+            yearRecords,
             year
         );
 
     }
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
-            "Errore aggiornamento grafici:",
+            "Errore caricamento grafici:",
             error
         );
 
@@ -250,7 +251,118 @@ async function updateCharts() {
 
 /*
 |--------------------------------------------------------------------------
-| Grafici per famiglia
+| AGGIORNAMENTO DA ANALISI
+|--------------------------------------------------------------------------
+*/
+
+function updateChartsFromAnalysisData(
+    records,
+    year,
+    month
+) {
+
+    renderFamilyCharts(
+        records
+    );
+
+
+    renderODCLChart(
+        records,
+        ""
+    );
+
+
+    const numericYear =
+        Number(
+            year
+        );
+
+
+    const numericMonth =
+        Number(
+            month
+        );
+
+
+    if (
+        Number.isFinite(
+            numericYear
+        ) &&
+        Number.isFinite(
+            numericMonth
+        )
+    ) {
+
+        void getRecordsByDateRange(
+            `${numericYear}-01-01`,
+            `${numericYear + 1}-01-01`
+        )
+        .then(
+            recordsForYear =>
+                renderMonthlyChart(
+                    recordsForYear,
+                    String(year)
+                )
+        )
+        .catch(
+            error =>
+                console.error(
+                    "Errore caricamento grafico annuale:",
+                    error
+                )
+        );
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| PULIZIA GRAFICI
+|--------------------------------------------------------------------------
+*/
+
+function clearCharts() {
+
+    destroyChart(
+        chartFamilyQuantity
+    );
+
+
+    destroyChart(
+        chartFamilyValue
+    );
+
+
+    destroyChart(
+        chartODCLValue
+    );
+
+
+    destroyChart(
+        chartMonthlyValue
+    );
+
+
+    chartFamilyQuantity =
+        null;
+
+    chartFamilyValue =
+        null;
+
+    chartODCLValue =
+        null;
+
+    chartMonthlyValue =
+        null;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| GRAFICI FAMIGLIE
 |--------------------------------------------------------------------------
 */
 
@@ -261,10 +373,11 @@ function renderFamilyCharts(
     const quantities =
         Object.fromEntries(
             CHART_FAMILIES.map(
-                family => [
-                    family,
-                    0
-                ]
+                family =>
+                    [
+                        family,
+                        0
+                    ]
             )
         );
 
@@ -272,10 +385,11 @@ function renderFamilyCharts(
     const values =
         Object.fromEntries(
             CHART_FAMILIES.map(
-                family => [
-                    family,
-                    0
-                ]
+                family =>
+                    [
+                        family,
+                        0
+                    ]
             )
         );
 
@@ -296,19 +410,25 @@ function renderFamilyCharts(
             CHART_FAMILIES.forEach(
                 family => {
 
-                    quantities[family] +=
+                    quantities[
+                        family
+                    ] +=
                         Number(
                             classification[
                                 family
-                            ] || 0
+                            ] ||
+                            0
                         );
 
 
-                    values[family] +=
+                    values[
+                        family
+                    ] +=
                         Number(
                             working[
                                 family
-                            ] || 0
+                            ] ||
+                            0
                         );
 
                 }
@@ -319,56 +439,44 @@ function renderFamilyCharts(
 
 
     drawBarChart(
-
         "chartFamilyQuantity",
-
         chartFamilyQuantity,
-
         CHART_FAMILY_LABELS,
-
         CHART_FAMILIES.map(
             family =>
-                quantities[family]
+                quantities[
+                    family
+                ]
         ),
-
         "Pezzi",
-
         false,
-
         instance => {
 
             chartFamilyQuantity =
                 instance;
 
         }
-
     );
 
 
     drawBarChart(
-
         "chartFamilyValue",
-
         chartFamilyValue,
-
         CHART_FAMILY_LABELS,
-
         CHART_FAMILIES.map(
             family =>
-                values[family]
+                values[
+                    family
+                ]
         ),
-
         "€",
-
         true,
-
         instance => {
 
             chartFamilyValue =
                 instance;
 
         }
-
     );
 
 }
@@ -376,7 +484,7 @@ function renderFamilyCharts(
 
 /*
 |--------------------------------------------------------------------------
-| Grafico lavorazione per ODCL
+| GRAFICO ODCL
 |--------------------------------------------------------------------------
 */
 
@@ -394,7 +502,8 @@ function renderODCLChart(
 
             const odcl =
                 String(
-                    record.odcl ?? ""
+                    record.odcl ??
+                    ""
                 ).trim();
 
 
@@ -424,7 +533,7 @@ function renderODCLChart(
                 {};
 
 
-            const total =
+            const value =
                 CHART_FAMILIES.reduce(
                     (
                         sum,
@@ -434,7 +543,8 @@ function renderODCLChart(
                         Number(
                             working[
                                 family
-                            ] || 0
+                            ] ||
+                            0
                         ),
                     0
                 );
@@ -444,76 +554,55 @@ function renderODCLChart(
                 odcl,
                 grouped.get(
                     odcl
-                ) + total
+                ) + value
             );
 
         }
     );
 
 
-    /*
-     * Se è selezionato un ODCL,
-     * garantiamo che venga visualizzato
-     * anche nel caso in cui il valore sia 0.
-     */
-
-    if (
-        selectedODCL &&
-        !grouped.has(
-            String(selectedODCL)
-        )
-    ) {
-
-        grouped.set(
-            String(selectedODCL),
-            0
-        );
-
-    }
-
-
-    const odcls =
+    const labels =
         [
             ...grouped.keys()
         ]
         .sort(
-            (a, b) =>
+            (
+                a,
+                b
+            ) =>
                 a.localeCompare(
                     b,
                     "it",
                     {
-                        numeric: true
+                        numeric:
+                            true
                     }
                 )
         );
 
 
-    drawBarChart(
-
-        "chartODCLValue",
-
-        chartODCLValue,
-
-        odcls,
-
-        odcls.map(
+    const data =
+        labels.map(
             odcl =>
                 grouped.get(
                     odcl
                 )
-        ),
+        );
 
+
+    drawBarChart(
+        "chartODCLValue",
+        chartODCLValue,
+        labels,
+        data,
         "€",
-
         true,
-
         instance => {
 
             chartODCLValue =
                 instance;
 
         }
-
     );
 
 }
@@ -521,43 +610,14 @@ function renderODCLChart(
 
 /*
 |--------------------------------------------------------------------------
-| Grafico andamento mensile
+| GRAFICO MENSILE
 |--------------------------------------------------------------------------
 */
 
 function renderMonthlyChart(
     records,
-    selectedYear
+    year
 ) {
-
-    const months = [
-
-        "Gen",
-
-        "Feb",
-
-        "Mar",
-
-        "Apr",
-
-        "Mag",
-
-        "Giu",
-
-        "Lug",
-
-        "Ago",
-
-        "Set",
-
-        "Ott",
-
-        "Nov",
-
-        "Dic"
-
-    ];
-
 
     const values =
         Array(
@@ -570,33 +630,28 @@ function renderMonthlyChart(
     records.forEach(
         record => {
 
+            const date =
+                String(
+                    record.dataConsegna ??
+                    ""
+                ).trim();
+
+
+            const match =
+                date.match(
+                    /^(\d{4})-(\d{2})-\d{2}$/
+                );
+
+
             if (
-                !record.dataConsegna
+                !match ||
+                match[1] !==
+                String(year)
             ) {
 
                 return;
 
             }
-
-
-            const match =
-                String(
-                    record.dataConsegna
-                )
-                .match(
-                    /^(\d{4})-(\d{2})-\d{2}$/
-                );
-
-
-            if (!match) {
-
-                return;
-
-            }
-
-
-            const year =
-                match[1];
 
 
             const monthIndex =
@@ -606,11 +661,8 @@ function renderMonthlyChart(
 
 
             if (
-                selectedYear &&
-                year !==
-                    String(
-                        selectedYear
-                    )
+                monthIndex < 0 ||
+                monthIndex > 11
             ) {
 
                 return;
@@ -635,7 +687,8 @@ function renderMonthlyChart(
                         Number(
                             working[
                                 family
-                            ] || 0
+                            ] ||
+                            0
                         ),
                     0
                 );
@@ -664,7 +717,9 @@ function renderMonthlyChart(
 
     chartMonthlyValue =
         new Chart(
-            canvas.getContext("2d"),
+            canvas.getContext(
+                "2d"
+            ),
             {
 
                 type:
@@ -672,8 +727,22 @@ function renderMonthlyChart(
 
                 data: {
 
-                    labels:
-                        months,
+                    labels: [
+
+                        "Gen",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "Mag",
+                        "Giu",
+                        "Lug",
+                        "Ago",
+                        "Set",
+                        "Ott",
+                        "Nov",
+                        "Dic"
+
+                    ],
 
                     datasets: [
 
@@ -703,13 +772,11 @@ function renderMonthlyChart(
 
                 },
 
-
                 options:
-                    baseChartOptions(
-                        {
-                            currency: true
-                        }
-                    )
+                    baseChartOptions({
+                        currency:
+                            true
+                    })
 
             }
         );
@@ -719,26 +786,18 @@ function renderMonthlyChart(
 
 /*
 |--------------------------------------------------------------------------
-| Grafico a barre
+| BAR CHART
 |--------------------------------------------------------------------------
 */
 
 function drawBarChart(
-
     canvasId,
-
     currentChart,
-
     labels,
-
     data,
-
     datasetLabel,
-
     currency,
-
     assign
-
 ) {
 
     const canvas =
@@ -761,7 +820,9 @@ function drawBarChart(
 
     const chart =
         new Chart(
-            canvas.getContext("2d"),
+            canvas.getContext(
+                "2d"
+            ),
             {
 
                 type:
@@ -769,8 +830,7 @@ function drawBarChart(
 
                 data: {
 
-                    labels:
-                        labels,
+                    labels,
 
                     datasets: [
 
@@ -779,8 +839,7 @@ function drawBarChart(
                             label:
                                 datasetLabel,
 
-                            data:
-                                data,
+                            data,
 
                             borderWidth:
                                 0,
@@ -794,13 +853,10 @@ function drawBarChart(
 
                 },
 
-
                 options:
-                    baseChartOptions(
-                        {
-                            currency
-                        }
-                    )
+                    baseChartOptions({
+                        currency
+                    })
 
             }
         );
@@ -815,7 +871,7 @@ function drawBarChart(
 
 /*
 |--------------------------------------------------------------------------
-| Opzioni comuni
+| OPZIONI BASE
 |--------------------------------------------------------------------------
 */
 
@@ -831,7 +887,6 @@ function baseChartOptions({
         maintainAspectRatio:
             false,
 
-
         plugins: {
 
             legend: {
@@ -840,7 +895,6 @@ function baseChartOptions({
                     false
 
             },
-
 
             tooltip: {
 
@@ -858,11 +912,9 @@ function baseChartOptions({
 
 
                         return currency
-
                             ? formatCurrency(
                                 value
                             )
-
                             : formatNumber(
                                 value
                             );
@@ -874,7 +926,6 @@ function baseChartOptions({
             }
 
         },
-
 
         scales: {
 
@@ -889,12 +940,10 @@ function baseChartOptions({
 
             },
 
-
             y: {
 
                 beginAtZero:
                     true,
-
 
                 ticks: {
 
@@ -903,11 +952,9 @@ function baseChartOptions({
                     ) {
 
                         return currency
-
                             ? formatCurrencyShort(
                                 value
                             )
-
                             : formatNumber(
                                 value
                             );
@@ -927,50 +974,7 @@ function baseChartOptions({
 
 /*
 |--------------------------------------------------------------------------
-| Eliminazione grafici
-|--------------------------------------------------------------------------
-*/
-
-function clearAllCharts() {
-
-    destroyChart(
-        chartFamilyQuantity
-    );
-
-    destroyChart(
-        chartFamilyValue
-    );
-
-    destroyChart(
-        chartODCLValue
-    );
-
-    destroyChart(
-        chartMonthlyValue
-    );
-
-
-    chartFamilyQuantity =
-        null;
-
-
-    chartFamilyValue =
-        null;
-
-
-    chartODCLValue =
-        null;
-
-
-    chartMonthlyValue =
-        null;
-
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Destroy
+| DISTRUZIONE GRAFICO
 |--------------------------------------------------------------------------
 */
 
@@ -989,73 +993,71 @@ function destroyChart(
 
 /*
 |--------------------------------------------------------------------------
-| Lettura record
+| RANGE MENSILE
 |--------------------------------------------------------------------------
 */
 
-async function getChartRecords() {
-
-    return await getAllRecords();
-
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Controllo mese
-|--------------------------------------------------------------------------
-*/
-
-function isInMonth(
-    record,
+function getChartMonthRange(
     year,
     month
 ) {
 
-    const date =
-        String(
-            record.dataConsegna ?? ""
-        ).trim();
-
-
-    const match =
-        date.match(
-            /^(\d{4})-(\d{2})-\d{2}$/
+    const numericYear =
+        Number(
+            year
         );
 
 
-    if (!match) {
+    const numericMonth =
+        Number(
+            month
+        );
 
-        return false;
 
-    }
+    const start =
+        `${numericYear}-${String(
+            numericMonth
+        ).padStart(
+            2,
+            "0"
+        )}-01`;
 
 
-    return (
+    const nextYear =
+        numericMonth === 12
+            ? numericYear + 1
+            : numericYear;
 
-        match[1] ===
-            String(
-                year
-            )
 
-        &&
+    const nextMonth =
+        numericMonth === 12
+            ? 1
+            : numericMonth + 1;
 
-        match[2] ===
-            String(
-                month
-            ).padStart(
-                2,
-                "0"
-            )
 
-    );
+    const end =
+        `${nextYear}-${String(
+            nextMonth
+        ).padStart(
+            2,
+            "0"
+        )}-01`;
+
+
+    return {
+
+        start,
+
+        end
+
+    };
 
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| Formattazione
+| FORMATTAZIONE NUMERI
 |--------------------------------------------------------------------------
 */
 
@@ -1064,28 +1066,43 @@ function formatNumber(
 ) {
 
     return Number(
-        value || 0
+        value ||
+        0
     )
     .toLocaleString(
         "it-IT",
         {
-            maximumFractionDigits: 2
+
+            useGrouping:
+                true,
+
+            maximumFractionDigits:
+                2
+
         }
     );
 
 }
 
 
+/*
+|--------------------------------------------------------------------------
+| FORMATTAZIONE VALUTA
+|--------------------------------------------------------------------------
+*/
+
 function formatCurrency(
     value
 ) {
 
     return Number(
-        value || 0
+        value ||
+        0
     )
     .toLocaleString(
         "it-IT",
         {
+
             style:
                 "currency",
 
@@ -1104,26 +1121,35 @@ function formatCurrency(
 }
 
 
+/*
+|--------------------------------------------------------------------------
+| FORMATTAZIONE VALUTA ABBREVIATA
+|--------------------------------------------------------------------------
+*/
+
 function formatCurrencyShort(
     value
 ) {
 
     const number =
         Number(
-            value || 0
+            value ||
+            0
         );
 
 
     if (
         Math.abs(
             number
-        ) >= 1000
+        ) >=
+        1000
     ) {
 
         return (
 
             (
-                number / 1000
+                number /
+                1000
             )
             .toLocaleString(
                 "it-IT",

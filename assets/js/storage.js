@@ -4,212 +4,636 @@
 |--------------------------------------------------------------------------
 | Production Analyzer Kep
 |--------------------------------------------------------------------------
-| Persistenza centrale tramite Firebase Cloud Firestore.
+| Persistenza dati.
+| Electron: SQLite locale tramite preload / IPC.
+| Live Server: IndexedDB di fallback per i test web.
 |--------------------------------------------------------------------------
 */
 
+const LOCAL_DB_NAME = "ProductionAnalyzerKep";
+const LOCAL_DB_VERSION = 2;
 
-const IMPORTS_COLLECTION =
-    "imports";
+const IMPORTS_COLLECTION = "imports";
+const RECORDS_COLLECTION = "records";
 
+let dbPromise = null;
 
-const RECORDS_COLLECTION =
-    "records";
+const memoryCache = {
+    imports: null,
+    dateBounds: null,
+    ranges: new Map(),
+    odcl: new Map(),
+    allRecords: null
+};
+
+const isElectron =
+    typeof window !== "undefined" &&
+    !!window.productionAPI;
 
 
 /*
 |--------------------------------------------------------------------------
-| Controllo connessione
+| CACHE
 |--------------------------------------------------------------------------
 */
 
-function getFirestore() {
+function invalidateStorageCaches() {
+
+    memoryCache.imports =
+        null;
+
+    memoryCache.dateBounds =
+        null;
+
+    memoryCache.ranges.clear();
+
+    memoryCache.odcl.clear();
+
+    memoryCache.allRecords =
+        null;
+
 
     if (
-        !window.KepFirebase ||
-        !window.KepFirebase.db
+        typeof invalidateAnalysisCache ===
+        "function"
     ) {
 
-        throw new Error(
-            "Firebase / Firestore non è stato inizializzato."
-        );
+        invalidateAnalysisCache();
 
     }
-
-
-    return window.KepFirebase.db;
 
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| Salvataggio importazione
+| INDEXEDDB
 |--------------------------------------------------------------------------
 */
 
-async function saveImport(
-    importData
-) {
+function openIndexedDB() {
 
-    if (!importData) {
+    if (dbPromise) {
 
-        throw new Error(
-            "Nessuna importazione da salvare."
-        );
+        return dbPromise;
 
     }
 
 
-    const db =
-        getFirestore();
+    dbPromise =
+        new Promise(
+            (
+                resolve,
+                reject
+            ) => {
+
+                const request =
+                    indexedDB.open(
+                        LOCAL_DB_NAME,
+                        LOCAL_DB_VERSION
+                    );
 
 
-    /*
-     * Documento importazione
-     */
+                request.onupgradeneeded =
+                    event => {
 
-    await db
-        .collection(
-            IMPORTS_COLLECTION
-        )
-        .doc(
-            importData.importId
-        )
-        .set({
-
-            importId:
-                importData.importId,
-
-            odcl:
-                String(
-                    importData.odcl
-                ),
-
-            fileName:
-                importData.fileName,
-
-            sheetName:
-                importData.sheetName,
-
-            importedAt:
-                firebase.firestore.Timestamp.fromDate(
-                    new Date(
-                        importData.importedAt
-                    )
-                ),
-
-            rowCount:
-                Number(
-                    importData.rowCount
-                )
-
-        });
+                        const db =
+                            request.result;
 
 
-    /*
-     * Documenti delle righe
-     */
-
-    /*
-     * Firestore consente massimo 500 operazioni
-     * in una singola batch.
-     *
-     * Usiamo blocchi da 450 per stare tranquilli.
-     */
-
-    const batchSize =
-        450;
+                        let importsStore;
 
 
-    for (
-        let start = 0;
-        start < importData.records.length;
-        start += batchSize
-    ) {
+                        if (
+                            !db.objectStoreNames.contains(
+                                IMPORTS_COLLECTION
+                            )
+                        ) {
 
-        const batch =
-            db.batch();
+                            importsStore =
+                                db.createObjectStore(
+                                    IMPORTS_COLLECTION,
+                                    {
+                                        keyPath:
+                                            "importId"
+                                    }
+                                );
+
+                        }
+                        else {
+
+                            importsStore =
+                                event
+                                    .target
+                                    .transaction
+                                    .objectStore(
+                                        IMPORTS_COLLECTION
+                                    );
+
+                        }
 
 
-        const recordsChunk =
-            importData.records.slice(
-                start,
-                start + batchSize
-            );
+                        if (
+                            !importsStore.indexNames.contains(
+                                "odcl"
+                            )
+                        ) {
+
+                            importsStore.createIndex(
+                                "odcl",
+                                "odcl",
+                                {
+                                    unique:
+                                        false
+                                }
+                            );
+
+                        }
 
 
-        recordsChunk.forEach(
-            record => {
+                        if (
+                            !importsStore.indexNames.contains(
+                                "importedAt"
+                            )
+                        ) {
 
-                const recordRef =
-                    db
-                        .collection(
-                            RECORDS_COLLECTION
-                        )
-                        .doc(
-                            record.id
+                            importsStore.createIndex(
+                                "importedAt",
+                                "importedAt",
+                                {
+                                    unique:
+                                        false
+                                }
+                            );
+
+                        }
+
+
+                        let recordsStore;
+
+
+                        if (
+                            !db.objectStoreNames.contains(
+                                RECORDS_COLLECTION
+                            )
+                        ) {
+
+                            recordsStore =
+                                db.createObjectStore(
+                                    RECORDS_COLLECTION,
+                                    {
+                                        keyPath:
+                                            "id"
+                                    }
+                                );
+
+                        }
+                        else {
+
+                            recordsStore =
+                                event
+                                    .target
+                                    .transaction
+                                    .objectStore(
+                                        RECORDS_COLLECTION
+                                    );
+
+                        }
+
+
+                        [
+                            [
+                                "dataConsegna",
+                                "dataConsegna"
+                            ],
+                            [
+                                "odcl",
+                                "odcl"
+                            ],
+                            [
+                                "importId",
+                                "importId"
+                            ]
+                        ]
+                        .forEach(
+                            (
+                                [
+                                    name,
+                                    keyPath
+                                ]
+                            ) => {
+
+                                if (
+                                    !recordsStore.indexNames.contains(
+                                        name
+                                    )
+                                ) {
+
+                                    recordsStore.createIndex(
+                                        name,
+                                        keyPath,
+                                        {
+                                            unique:
+                                                false
+                                        }
+                                    );
+
+                                }
+
+                            }
                         );
 
+                    };
 
-                batch.set(
-                    recordRef,
-                    record
-                );
+
+                request.onsuccess =
+                    () => {
+
+                        resolve(
+                            request.result
+                        );
+
+                    };
+
+
+                request.onerror =
+                    () => {
+
+                        dbPromise =
+                            null;
+
+                        reject(
+                            request.error ||
+                            new Error(
+                                "Impossibile aprire il database locale."
+                            )
+                        );
+
+                    };
 
             }
         );
 
 
-        await batch.commit();
-
-    }
-
-
-    return (
-        importData.importId
-    );
+    return dbPromise;
 
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| Recupero importazioni
+| SALVATAGGIO INDEXEDDB
 |--------------------------------------------------------------------------
 */
 
-async function getAllImports() {
+async function saveImportIndexedDB(
+    importData
+) {
 
     const db =
-        getFirestore();
+        await openIndexedDB();
 
 
-    const snapshot =
-        await db
-            .collection(
-                IMPORTS_COLLECTION
+    const importRecord = {
+
+        importId:
+            String(
+                importData.importId
+            ),
+
+        odcl:
+            String(
+                importData.odcl ??
+                ""
+            ),
+
+        fileName:
+            String(
+                importData.fileName ??
+                ""
+            ),
+
+        sheetName:
+            String(
+                importData.sheetName ??
+                ""
+            ),
+
+        importedAt:
+            String(
+                importData.importedAt ??
+                new Date().toISOString()
+            ),
+
+        rowCount:
+            Number(
+                importData.rowCount ||
+                0
             )
-            .get();
+
+    };
 
 
-    return snapshot.docs.map(
-        document => {
+    await new Promise(
+        (
+            resolve,
+            reject
+        ) => {
 
-            const data =
-                document.data();
+            const transaction =
+                db.transaction(
+                    [
+                        IMPORTS_COLLECTION,
+                        RECORDS_COLLECTION
+                    ],
+                    "readwrite"
+                );
 
 
-            return {
+            transaction
+                .objectStore(
+                    IMPORTS_COLLECTION
+                )
+                .put(
+                    importRecord
+                );
 
-                ...data,
 
-                importedAt:
-                    convertFirestoreDate(
-                        data.importedAt
+            for (
+                const record
+                of (
+                    importData.records ||
+                    []
+                )
+            ) {
+
+                transaction
+                    .objectStore(
+                        RECORDS_COLLECTION
                     )
+                    .put(
+                        record
+                    );
 
-            };
+            }
+
+
+            transaction.oncomplete =
+                resolve;
+
+
+            transaction.onerror =
+                () =>
+                    reject(
+                        transaction.error
+                    );
+
+
+            transaction.onabort =
+                () =>
+                    reject(
+                        transaction.error
+                    );
+
+        }
+    );
+
+
+    return importRecord.importId;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| LETTURA IMPORTAZIONI INDEXEDDB
+|--------------------------------------------------------------------------
+*/
+
+async function getAllImportsIndexedDB() {
+
+    const db =
+        await openIndexedDB();
+
+
+    const imports =
+        await new Promise(
+            (
+                resolve,
+                reject
+            ) => {
+
+                const transaction =
+                    db.transaction(
+                        IMPORTS_COLLECTION,
+                        "readonly"
+                    );
+
+
+                const request =
+                    transaction
+                        .objectStore(
+                            IMPORTS_COLLECTION
+                        )
+                        .getAll();
+
+
+                request.onsuccess =
+                    () =>
+                        resolve(
+                            request.result ||
+                            []
+                        );
+
+
+                request.onerror =
+                    () =>
+                        reject(
+                            request.error
+                        );
+
+            }
+        );
+
+
+    imports.sort(
+        (
+            a,
+            b
+        ) =>
+            String(
+                b.importedAt ||
+                ""
+            )
+            .localeCompare(
+                String(
+                    a.importedAt ||
+                    ""
+                )
+            )
+    );
+
+
+    return imports;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| ESTREMI DATE INDEXEDDB
+|--------------------------------------------------------------------------
+*/
+
+async function getAnalysisDateBoundsIndexedDB() {
+
+    const db =
+        await openIndexedDB();
+
+
+    return await new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const transaction =
+                db.transaction(
+                    RECORDS_COLLECTION,
+                    "readonly"
+                );
+
+
+            const index =
+                transaction
+                    .objectStore(
+                        RECORDS_COLLECTION
+                    )
+                    .index(
+                        "dataConsegna"
+                    );
+
+
+            let minDate =
+                null;
+
+            let maxDate =
+                null;
+
+
+            let pending =
+                2;
+
+
+            const done =
+                () => {
+
+                    pending -= 1;
+
+
+                    if (
+                        pending !== 0
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    resolve({
+
+                        minDate,
+
+                        maxDate,
+
+                        minYear:
+                            minDate
+                                ? minDate.slice(
+                                    0,
+                                    4
+                                )
+                                : null,
+
+                        maxYear:
+                            maxDate
+                                ? maxDate.slice(
+                                    0,
+                                    4
+                                )
+                                : null
+
+                    });
+
+                };
+
+
+            const first =
+                index.openCursor();
+
+
+            first.onsuccess =
+                event => {
+
+                    const cursor =
+                        event.target.result;
+
+
+                    minDate =
+                        cursor
+                            ? String(
+                                cursor.value
+                                    ?.dataConsegna ??
+                                ""
+                            ).trim()
+                            : null;
+
+
+                    done();
+
+                };
+
+
+            first.onerror =
+                () =>
+                    reject(
+                        first.error
+                    );
+
+
+            const last =
+                index.openCursor(
+                    null,
+                    "prev"
+                );
+
+
+            last.onsuccess =
+                event => {
+
+                    const cursor =
+                        event.target.result;
+
+
+                    maxDate =
+                        cursor
+                            ? String(
+                                cursor.value
+                                    ?.dataConsegna ??
+                                ""
+                            ).trim()
+                            : null;
+
+
+                    done();
+
+                };
+
+
+            last.onerror =
+                () =>
+                    reject(
+                        last.error
+                    );
 
         }
     );
@@ -219,27 +643,68 @@ async function getAllImports() {
 
 /*
 |--------------------------------------------------------------------------
-| Recupero tutti i record
+| RECORD PER PERIODO INDEXEDDB
 |--------------------------------------------------------------------------
 */
 
-async function getAllRecords() {
+async function getRecordsByDateRangeIndexedDB(
+    startDate,
+    endDate
+) {
 
     const db =
-        getFirestore();
+        await openIndexedDB();
 
 
-    const snapshot =
-        await db
-            .collection(
-                RECORDS_COLLECTION
-            )
-            .get();
+    return await new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const transaction =
+                db.transaction(
+                    RECORDS_COLLECTION,
+                    "readonly"
+                );
 
 
-    return snapshot.docs.map(
-        document =>
-            document.data()
+            const index =
+                transaction
+                    .objectStore(
+                        RECORDS_COLLECTION
+                    )
+                    .index(
+                        "dataConsegna"
+                    );
+
+
+            const request =
+                index.getAll(
+                    IDBKeyRange.bound(
+                        startDate,
+                        endDate,
+                        false,
+                        true
+                    )
+                );
+
+
+            request.onsuccess =
+                () =>
+                    resolve(
+                        request.result ||
+                        []
+                    );
+
+
+            request.onerror =
+                () =>
+                    reject(
+                        request.error
+                    );
+
+        }
     );
 
 }
@@ -247,165 +712,486 @@ async function getAllRecords() {
 
 /*
 |--------------------------------------------------------------------------
-| Recupero record per ODCL
+| RECORD PER ODCL INDEXEDDB
 |--------------------------------------------------------------------------
 */
+
+async function getRecordsByODCLIndexedDB(
+    odcl
+) {
+
+    const db =
+        await openIndexedDB();
+
+
+    return await new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const transaction =
+                db.transaction(
+                    RECORDS_COLLECTION,
+                    "readonly"
+                );
+
+
+            const index =
+                transaction
+                    .objectStore(
+                        RECORDS_COLLECTION
+                    )
+                    .index(
+                        "odcl"
+                    );
+
+
+            const request =
+                index.getAll(
+                    String(
+                        odcl
+                    ).trim()
+                );
+
+
+            request.onsuccess =
+                () =>
+                    resolve(
+                        request.result ||
+                        []
+                    );
+
+
+            request.onerror =
+                () =>
+                    reject(
+                        request.error
+                    );
+
+        }
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| TUTTI I RECORD INDEXEDDB
+|--------------------------------------------------------------------------
+*/
+
+async function getAllRecordsIndexedDB() {
+
+    const db =
+        await openIndexedDB();
+
+
+    return await new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const request =
+                db
+                    .transaction(
+                        RECORDS_COLLECTION,
+                        "readonly"
+                    )
+                    .objectStore(
+                        RECORDS_COLLECTION
+                    )
+                    .getAll();
+
+
+            request.onsuccess =
+                () =>
+                    resolve(
+                        request.result ||
+                        []
+                    );
+
+
+            request.onerror =
+                () =>
+                    reject(
+                        request.error
+                    );
+
+        }
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| ELIMINAZIONE INDEXEDDB
+|--------------------------------------------------------------------------
+*/
+
+async function deleteImportIndexedDB(
+    importId
+) {
+
+    const db =
+        await openIndexedDB();
+
+
+    await new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const transaction =
+                db.transaction(
+                    [
+                        IMPORTS_COLLECTION,
+                        RECORDS_COLLECTION
+                    ],
+                    "readwrite"
+                );
+
+
+            const recordsStore =
+                transaction.objectStore(
+                    RECORDS_COLLECTION
+                );
+
+
+            const cursorRequest =
+                recordsStore
+                    .index(
+                        "importId"
+                    )
+                    .openCursor(
+                        String(
+                            importId
+                        )
+                    );
+
+
+            cursorRequest.onsuccess =
+                event => {
+
+                    const cursor =
+                        event.target.result;
+
+
+                    if (!cursor) {
+
+                        transaction
+                            .objectStore(
+                                IMPORTS_COLLECTION
+                            )
+                            .delete(
+                                String(
+                                    importId
+                                )
+                            );
+
+                        return;
+
+                    }
+
+
+                    cursor.delete();
+
+                    cursor.continue();
+
+                };
+
+
+            cursorRequest.onerror =
+                () =>
+                    reject(
+                        cursorRequest.error
+                    );
+
+
+            transaction.oncomplete =
+                resolve;
+
+
+            transaction.onerror =
+                () =>
+                    reject(
+                        transaction.error
+                    );
+
+        }
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| API PUBBLICA
+|--------------------------------------------------------------------------
+*/
+
+async function saveImport(
+    importData
+) {
+
+    const result =
+        isElectron
+            ? await window.productionAPI.saveImport(
+                importData
+            )
+            : await saveImportIndexedDB(
+                importData
+            );
+
+
+    invalidateStorageCaches();
+
+
+    return result;
+
+}
+
+
+async function getAllImports() {
+
+    if (
+        memoryCache.imports
+    ) {
+
+        return memoryCache.imports;
+
+    }
+
+
+    const result =
+        isElectron
+            ? await window.productionAPI.getAllImports()
+            : await getAllImportsIndexedDB();
+
+
+    memoryCache.imports =
+        result;
+
+
+    return result;
+
+}
+
+
+async function getAnalysisDateBounds() {
+
+    if (
+        memoryCache.dateBounds
+    ) {
+
+        return memoryCache.dateBounds;
+
+    }
+
+
+    const result =
+        isElectron
+            ? await window.productionAPI.getAnalysisDateBounds()
+            : await getAnalysisDateBoundsIndexedDB();
+
+
+    memoryCache.dateBounds =
+        result;
+
+
+    return result;
+
+}
+
+
+async function getRecordsByDateRange(
+    startDate,
+    endDate
+) {
+
+    if (
+        !startDate ||
+        !endDate
+    ) {
+
+        return [];
+
+    }
+
+
+    const cacheKey =
+        `${startDate}|${endDate}`;
+
+
+    if (
+        memoryCache.ranges.has(
+            cacheKey
+        )
+    ) {
+
+        return memoryCache.ranges.get(
+            cacheKey
+        );
+
+    }
+
+
+    const result =
+        isElectron
+            ? await window.productionAPI.getRecordsByDateRange(
+                startDate,
+                endDate
+            )
+            : await getRecordsByDateRangeIndexedDB(
+                startDate,
+                endDate
+            );
+
+
+    memoryCache.ranges.set(
+        cacheKey,
+        result
+    );
+
+
+    return result;
+
+}
+
 
 async function getRecordsByODCL(
     odcl
 ) {
 
-    if (!odcl) {
+    const normalized =
+        String(
+            odcl ??
+            ""
+        ).trim();
 
-        throw new Error(
-            "Numero ODCL non specificato."
+
+    if (!normalized) {
+
+        return [];
+
+    }
+
+
+    if (
+        memoryCache.odcl.has(
+            normalized
+        )
+    ) {
+
+        return memoryCache.odcl.get(
+            normalized
         );
 
     }
 
 
-    const db =
-        getFirestore();
-
-
-    const snapshot =
-        await db
-            .collection(
-                RECORDS_COLLECTION
+    const result =
+        isElectron
+            ? await window.productionAPI.getRecordsByODCL(
+                normalized
             )
-            .where(
-                "odcl",
-                "==",
-                String(
-                    odcl
-                )
-            )
-            .get();
+            : await getRecordsByODCLIndexedDB(
+                normalized
+            );
 
 
-    return snapshot.docs.map(
-        document =>
-            document.data()
+    memoryCache.odcl.set(
+        normalized,
+        result
     );
+
+
+    return result;
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Eliminazione importazione
-|--------------------------------------------------------------------------
-*/
+async function getAllRecords() {
+
+    if (
+        memoryCache.allRecords
+    ) {
+
+        return memoryCache.allRecords;
+
+    }
+
+
+    const result =
+        isElectron
+            ? await window.productionAPI.getAllRecords()
+            : await getAllRecordsIndexedDB();
+
+
+    memoryCache.allRecords =
+        result;
+
+
+    return result;
+
+}
+
 
 async function deleteImport(
     importId
 ) {
 
-    if (!importId) {
-
-        throw new Error(
-            "ID importazione non specificato."
-        );
-
-    }
-
-
-    const db =
-        getFirestore();
-
-
-    /*
-     * Recuperiamo le righe associate.
-     */
-
-    const recordsSnapshot =
-        await db
-            .collection(
-                RECORDS_COLLECTION
-            )
-            .where(
-                "importId",
-                "==",
+    const result =
+        isElectron
+            ? await window.productionAPI.deleteImport(
                 importId
             )
-            .get();
-
-
-    /*
-     * Eliminiamo in blocchi.
-     */
-
-    const batchSize =
-        450;
-
-
-    for (
-        let start = 0;
-        start < recordsSnapshot.docs.length;
-        start += batchSize
-    ) {
-
-        const batch =
-            db.batch();
-
-
-        const docs =
-            recordsSnapshot.docs.slice(
-                start,
-                start + batchSize
+            : await deleteImportIndexedDB(
+                importId
             );
 
 
-        docs.forEach(
-            document => {
-
-                batch.delete(
-                    document.ref
-                );
-
-            }
-        );
+    invalidateStorageCaches();
 
 
-        await batch.commit();
-
-    }
-
-
-    /*
-     * Infine eliminiamo l'importazione.
-     */
-
-    await db
-        .collection(
-            IMPORTS_COLLECTION
-        )
-        .doc(
-            importId
-        )
-        .delete();
-
-
-    return true;
+    return result;
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Conversione timestamp
-|--------------------------------------------------------------------------
-*/
+function getLocalDatabasePath() {
+
+    if (!isElectron) {
+
+        return null;
+
+    }
+
+
+    return window.productionAPI.getDatabasePath();
+
+}
+
 
 function convertFirestoreDate(
     value
 ) {
 
-    if (
-        !value
-    ) {
+    if (!value) {
 
         return null;
+
+    }
+
+
+    if (
+        value instanceof Date
+    ) {
+
+        return value.toISOString();
 
     }
 
@@ -422,6 +1208,8 @@ function convertFirestoreDate(
     }
 
 
-    return value;
+    return String(
+        value
+    );
 
 }
