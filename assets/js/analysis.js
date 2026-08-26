@@ -1226,6 +1226,17 @@ function renderMonthlyODCL(
             
             row.className =
                 "monthly-odcl-detail-row";
+            
+            
+            if (
+                !monthlyODCLExpanded
+            ) {
+            
+                row.classList.add(
+                    "hidden"
+                );
+            
+            }
 
 
             row.innerHTML = `
@@ -2137,10 +2148,12 @@ function toggleMonthlyODCLRows() {
             ".monthly-odcl-detail-row"
         );
 
+
     const button =
         document.getElementById(
             "monthlyODCLToggle"
         );
+
 
     monthlyODCLExpanded =
         !monthlyODCLExpanded;
@@ -2170,6 +2183,56 @@ function toggleMonthlyODCLRows() {
             "aria-expanded",
             String(
                 monthlyODCLExpanded
+            )
+        );
+
+    }
+
+}
+
+
+function toggleMonthlyFamilyRows() {
+
+    const rows =
+        document.querySelectorAll(
+            ".monthly-family-detail-row"
+        );
+
+
+    const button =
+        document.getElementById(
+            "monthlyFamilyToggle"
+        );
+
+
+    monthlyFamilyExpanded =
+        !monthlyFamilyExpanded;
+
+
+    rows.forEach(
+        row => {
+
+            row.classList.toggle(
+                "hidden",
+                !monthlyFamilyExpanded
+            );
+
+        }
+    );
+
+
+    if (button) {
+
+        button.textContent =
+            monthlyFamilyExpanded
+                ? "−"
+                : "+";
+
+
+        button.setAttribute(
+            "aria-expanded",
+            String(
+                monthlyFamilyExpanded
             )
         );
 
