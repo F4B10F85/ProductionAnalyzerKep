@@ -1232,10 +1232,26 @@ function renderMonthlyODCL(
     );
 
 
-    setText(
-        "monthlyODCLTitle",
-        `RIEPILOGO PER OdCL - ${getMonthName(month).toUpperCase()} ${year} (escluso POLO per quantità)`
-    );
+    const title =
+        document.getElementById(
+            "monthlyODCLTitle"
+        );
+    
+    if (title) {
+    
+        const label =
+            title.querySelector(
+                "span"
+            );
+    
+        if (label) {
+    
+            label.textContent =
+                `RIEPILOGO PER ODCL - ${getMonthName(month).toUpperCase()} ${year}`;
+    
+        }
+    
+    }
 
 }
 
@@ -1689,9 +1705,26 @@ function renderEmptyMonthly() {
     }
 
 
-    setText(
-        "monthlyODCLTitle",
-        "RIEPILOGO PER OdCL"
+    const title =
+        document.getElementById(
+            "monthlyODCLTitle"
+        );
+    
+    if (title) {
+    
+        const label =
+            title.querySelector(
+                "span"
+            );
+    
+        if (label) {
+    
+            label.textContent =
+                `RIEPILOGO PER ODCL - ${getMonthName(month).toUpperCase()} ${year} (escluso POLO per quantità)`;
+    
+        }
+    
+    }
     );
 
 }
