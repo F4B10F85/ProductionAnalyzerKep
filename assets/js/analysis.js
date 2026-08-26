@@ -1,5 +1,7 @@
 "use strict";
 
+let monthlyODCLExpanded = true;
+
 /*
 |--------------------------------------------------------------------------
 | Production Analyzer Kep
@@ -1143,9 +1145,10 @@ function renderMonthlyODCL(
 
 
             const row =
-                document.createElement(
-                    "tr"
-                );
+                document.createElement("tr");
+            
+            row.className =
+                "monthly-odcl-detail-row";
 
 
             row.innerHTML = `
@@ -1235,6 +1238,33 @@ function renderMonthlyODCL(
     );
 
 }
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const button =
+            document.getElementById(
+                "monthlyODCLToggle"
+            );
+
+
+        if (!button) {
+
+            return;
+
+        }
+
+
+        button.addEventListener(
+            "click",
+            toggleMonthlyODCLRows
+        );
+
+    }
+);
+
+
 
 
 /*
@@ -1861,5 +1891,52 @@ function showPageError(
     workspace.prepend(
         error
     );
+
+}
+
+function toggleMonthlyODCLRows() {
+
+    const rows =
+        document.querySelectorAll(
+            ".monthly-odcl-detail-row"
+        );
+
+    const button =
+        document.getElementById(
+            "monthlyODCLToggle"
+        );
+
+    monthlyODCLExpanded =
+        !monthlyODCLExpanded;
+
+
+    rows.forEach(
+        row => {
+
+            row.classList.toggle(
+                "hidden",
+                !monthlyODCLExpanded
+            );
+
+        }
+    );
+
+
+    if (button) {
+
+        button.textContent =
+            monthlyODCLExpanded
+                ? "−"
+                : "+";
+
+
+        button.setAttribute(
+            "aria-expanded",
+            String(
+                monthlyODCLExpanded
+            )
+        );
+
+    }
 
 }
