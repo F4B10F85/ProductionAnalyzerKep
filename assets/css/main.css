@@ -918,23 +918,81 @@ tbody tr:hover {
 
 
 .result-title {
+    position: relative;
+
     min-height: 40px;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
-    padding: 7px 12px;
+    padding: 7px 52px 7px 12px;
 
     color: #0b4b9e;
-
     font-size: 16px;
-
     font-weight: 800;
+    text-align: center;
+}
+
+.monthly-family-title,
+.monthly-odcl-title {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding-right: 52px;
+}
+
+.monthly-family-title > span,
+.monthly-odcl-title > span {
+    width: 100%;
 
     text-align: center;
+}
+
+.monthly-odcl-toggle,
+.monthly-family-toggle {
+    position: absolute;
+
+    right: 12px;
+    top: 50%;
+
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    transform: translateY(-50%);
+
+    border: 1px solid #cfd5dc;
+    border-radius: 6px;
+
+    background: #ffffff;
+    color: #17202b;
+
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 600;
+
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.monthly-odcl-toggle:hover,
+.monthly-family-toggle:hover {
+    background: #f1f4f7;
+}
+
+.monthly-odcl-toggle:active,
+.monthly-family-toggle:active {
+    transform: translateY(-50%) scale(0.97);
 }
 
 
@@ -1751,10 +1809,4 @@ tbody tr:hover {
 .monthly-odcl-toggle:hover {
     background: #f1f4f7;
 }
-
-
-.monthly-odcl-toggle:active {
-    transform: scale(0.96);
-}
-
 

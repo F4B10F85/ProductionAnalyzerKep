@@ -751,72 +751,135 @@ function renderMonthlyFamilyTable(
                 </td>
 
                 <td>
-                    ${formatNumber(
+                    ${Number(
                         odclTotals.quantities[
                             "END-FAST"
-                        ]
+                        ] || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
                 <td>
-                    ${formatNumber(
+                    ${Number(
                         odclTotals.quantities[
                             "E-LIGHT"
-                        ]
+                        ] || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
                 <td>
-                    ${formatNumber(
+                    ${Number(
                         odclTotals.quantities[
                             "SMART"
-                        ]
+                        ] || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
                 <td>
-                    ${formatNumber(
+                    ${Number(
                         odclTotals.quantities[
                             "KEPPY"
-                        ]
+                        ] || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
                 <td>
-                    ${formatNumber(
+                    ${Number(
                         odclTotals.quantities[
                             "CR 2.0 T"
-                        ]
+                        ] || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
                 <td>
-                    ${formatNumber(
+                    ${Number(
                         odclTotals.quantities[
                             "CR 2.0 S/B"
-                        ]
+                        ] || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
                 <td>
-                    ${formatNumber(
+                    ${Number(
                         odclTotals.quantities[
                             "NOVA"
-                        ]
+                        ] || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
                 <td>
-                    ${formatNumber(
+                    ${Number(
                         odclTotals.quantities[
                             "POLO"
-                        ]
+                        ] || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
                 <td class="total-cell">
-                    ${formatNumber(
-                        odclTotals.productionQuantity
+                    ${Number(
+                        odclTotals.productionQuantity || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
@@ -854,72 +917,135 @@ function renderMonthlyFamilyTable(
         </td>
 
         <td>
-            ${formatNumber(
+            ${Number(
                 overallTotals.quantities[
                     "END-FAST"
-                ]
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
         <td>
-            ${formatNumber(
+            ${Number(
                 overallTotals.quantities[
                     "E-LIGHT"
-                ]
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
         <td>
-            ${formatNumber(
+            ${Number(
                 overallTotals.quantities[
                     "SMART"
-                ]
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
         <td>
-            ${formatNumber(
+            ${Number(
                 overallTotals.quantities[
                     "KEPPY"
-                ]
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
         <td>
-            ${formatNumber(
+            ${Number(
                 overallTotals.quantities[
                     "CR 2.0 T"
-                ]
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
         <td>
-            ${formatNumber(
+            ${Number(
                 overallTotals.quantities[
                     "CR 2.0 S/B"
-                ]
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
         <td>
-            ${formatNumber(
+            ${Number(
                 overallTotals.quantities[
                     "NOVA"
-                ]
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
         <td>
-            ${formatNumber(
+            ${Number(
                 overallTotals.quantities[
                     "POLO"
-                ]
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
         <td class="total-cell">
-            ${formatNumber(
-                overallTotals.productionQuantity
+            ${Number(
+                overallTotals.productionQuantity || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
@@ -954,73 +1080,136 @@ function renderMonthlyFamilyTable(
         </td>
 
         <td>
-            ${formatCurrency(
+            ${Number(
                 overallTotals.values[
                     "END-FAST"
-                ]
-            )}
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
         <td>
-            ${formatCurrency(
+            ${Number(
                 overallTotals.values[
                     "E-LIGHT"
-                ]
-            )}
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
         <td>
-            ${formatCurrency(
+            ${Number(
                 overallTotals.values[
                     "SMART"
-                ]
-            )}
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
         <td>
-            ${formatCurrency(
+            ${Number(
                 overallTotals.values[
                     "KEPPY"
-                ]
-            )}
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
         <td>
-            ${formatCurrency(
+            ${Number(
                 overallTotals.values[
                     "CR 2.0 T"
-                ]
-            )}
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
         <td>
-            ${formatCurrency(
+            ${Number(
                 overallTotals.values[
                     "CR 2.0 S/B"
-                ]
-            )}
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
         <td>
-            ${formatCurrency(
+            ${Number(
                 overallTotals.values[
                     "NOVA"
-                ]
-            )}
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
         <td>
-            ${formatCurrency(
+            ${Number(
                 overallTotals.values[
                     "POLO"
-                ]
-            )}
+                ] || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
         <td class="total-cell">
-            ${formatCurrency(
-                overallTotals.totalValue
-            )}
+            ${Number(
+                overallTotals.totalValue || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
     `;
@@ -1222,21 +1411,13 @@ function renderMonthlyODCL(
 
 
             const row =
-                document.createElement("tr");
-            
+                document.createElement(
+                    "tr"
+                );
+
+
             row.className =
                 "monthly-odcl-detail-row";
-            
-            
-            if (
-                !monthlyODCLExpanded
-            ) {
-            
-                row.classList.add(
-                    "hidden"
-                );
-            
-            }
 
 
             row.innerHTML = `
@@ -1248,21 +1429,41 @@ function renderMonthlyODCL(
                 </td>
 
                 <td>
-                    ${formatNumber(
-                        totals.productionQuantity
+                    ${Number(
+                        totals.productionQuantity || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }
                     )}
                 </td>
 
                 <td>
-                    ${formatCurrency(
-                        totals.totalValue
-                    )}
+                    ${Number(
+                        totals.totalValue || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            useGrouping: true,
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    )} €
                 </td>
 
                 <td>
-                    ${formatPercentage(
-                        percentage
-                    )}
+                    ${Number(
+                        percentage || 0
+                    ).toLocaleString(
+                        "it-IT",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    )} %
                 </td>
 
             `;
@@ -1293,23 +1494,43 @@ function renderMonthlyODCL(
         </td>
 
         <td>
-            ${formatNumber(
-                grandQuantity
+            ${Number(
+                grandQuantity || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }
             )}
         </td>
 
         <td>
-            ${formatCurrency(
-                grandValue
-            )}
+            ${Number(
+                grandValue || 0
+            ).toLocaleString(
+                "it-IT",
+                {
+                    useGrouping: true,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} €
         </td>
 
         <td>
-            ${formatPercentage(
+            ${Number(
                 monthlyTotalValue > 0
                     ? 100
                     : 0
-            )}
+            ).toLocaleString(
+                "it-IT",
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            )} %
         </td>
 
     `;
@@ -1324,21 +1545,23 @@ function renderMonthlyODCL(
         document.getElementById(
             "monthlyODCLTitle"
         );
-    
+
+
     if (title) {
-    
+
         const label =
             title.querySelector(
                 "span"
             );
-    
+
+
         if (label) {
-    
+
             label.textContent =
                 `RIEPILOGO PER ODCL - ${getMonthName(month).toUpperCase()} ${year}`;
-    
+
         }
-    
+
     }
 
 }
@@ -2009,15 +2232,21 @@ function formatNumber(
     value
 ) {
 
-    return Number(
-        value || 0
-    )
-    .toLocaleString(
-        "it-IT",
-        {
-            maximumFractionDigits: 2
-        }
-    );
+    const number =
+        Number(
+            value || 0
+        );
+
+
+    return number
+        .toLocaleString(
+            "it-IT",
+            {
+                useGrouping: true,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }
+        );
 
 }
 
@@ -2026,18 +2255,22 @@ function formatCurrency(
     value
 ) {
 
-    return Number(
-        value || 0
-    )
-    .toLocaleString(
-        "it-IT",
-        {
-            style: "currency",
-            currency: "EUR",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }
-    );
+    const number =
+        Number(
+            value || 0
+        );
+
+
+    return number
+        .toLocaleString(
+            "it-IT",
+            {
+                useGrouping: true,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        )
+        + " €";
 
 }
 
@@ -2239,3 +2472,4 @@ function toggleMonthlyFamilyRows() {
     }
 
 }
+
