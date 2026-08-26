@@ -241,6 +241,54 @@ function initializeAuth() {
         }
     );
 
+    /*
+     * Logout
+     */
+    
+    const logoutButton =
+        document.getElementById(
+            "logoutButton"
+        );
+    
+    
+    if (logoutButton) {
+    
+        logoutButton.addEventListener(
+            "click",
+            async () => {
+    
+                try {
+    
+                    logoutButton.disabled =
+                        true;
+    
+                    logoutButton.textContent =
+                        "USCITA...";
+    
+                    await KepFirebase.auth
+                        .signOut();
+    
+                }
+                catch (error) {
+    
+                    console.error(
+                        "Errore logout:",
+                        error
+                    );
+    
+                    logoutButton.disabled =
+                        false;
+    
+                    logoutButton.textContent =
+                        "ESCI";
+    
+                }
+    
+            }
+        );
+    
+    }
+
 }
 
 
