@@ -480,3 +480,487 @@ function formatDateISO(date) {
     ].join("-");
 
 }
+
+/*
+|--------------------------------------------------------------------------
+| IMPORTAZIONE MASSIVA
+|--------------------------------------------------------------------------
+*/
+
+function extractOdclFromFileName(
+    fileName
+) {
+
+    const baseName =
+        String(
+            fileName
+        )
+        .replace(
+            /\.[^/.]+$/,
+            ""
+        )
+        .trim();
+
+
+    if (
+        !/^\d+$/.test(
+            baseName
+        )
+    ) {
+
+        throw new Error(
+            `Il nome del file "${fileName}" non contiene un numero ODCL valido.`
+        );
+
+    }
+
+
+    return baseName;
+
+}
+
+
+async function importMultipleExcelFiles(
+    files
+) {
+
+    if (
+        !files ||
+        !files.length
+    ) {
+
+        throw new Error(
+            "Nessun file selezionato."
+        );
+
+    }
+
+
+    const statusElement =
+        document.getElementById(
+            "massImportStatus"
+        );
+
+
+    if (statusElement) {
+
+        statusElement.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    const fileList =
+        Array.from(
+            files
+        );
+
+
+    let importedCount = 0;
+
+    let errorCount = 0;
+
+    const errors = [];
+
+
+    updateMassImportStatus(
+        statusElement,
+        0,
+        fileList.length,
+        null
+    );
+
+
+    for (
+        let index = 0;
+        index < fileList.length;
+        index++
+    ) {
+
+        const file =
+            fileList[index];
+
+
+        try {
+
+            const odcl =
+                extractOdclFromFileName(
+                    file.name
+                );
+
+
+            updateMassImportStatus(
+                statusElement,
+                index,
+                fileList.length,
+                file.name
+            );
+
+
+            const importData =
+                await readExcelFile(
+                    file,
+                    odcl
+                );
+
+
+            await saveImport(
+                importData
+            );
+
+
+            importedCount++;
+
+
+        }
+        catch (error) {
+
+            console.error(
+                `Errore importazione ${file.name}:`,
+                error
+            );
+
+
+            errorCount++;
+
+
+            errors.push({
+
+                fileName:
+                    file.name,
+
+                message:
+                    error?.message ||
+                    "Errore sconosciuto."
+
+            });
+
+        }
+
+
+        updateMassImportStatus(
+            statusElement,
+            index + 1,
+            fileList.length,
+            null
+        );
+
+    }
+
+
+    showMassImportSummary(
+        statusElement,
+        fileList.length,
+        importedCount,
+        errorCount,
+        errors
+    );
+
+
+    if (
+        typeof loadArchive ===
+        "function"
+    ) {
+
+        await loadArchive();
+
+    }
+
+
+    if (
+        typeof initializeAnalysis ===
+        "function"
+    ) {
+
+        await initializeAnalysis();
+
+    }
+
+
+    if (
+        typeof updateCharts ===
+        "function"
+    ) {
+
+        await updateCharts();
+
+    }
+
+}
+
+
+function updateMassImportStatus(
+    element,
+    completed,
+    total,
+    currentFile
+) {
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    const percentage =
+        total > 0
+            ? Math.round(
+                (
+                    completed /
+                    total
+                ) *
+                100
+            )
+            : 0;
+
+
+    element.innerHTML = `
+
+        <div>
+            <strong>
+                IMPORTAZIONE STORICA
+            </strong>
+        </div>
+
+        <div>
+            File elaborati:
+            ${completed}
+            /
+            ${total}
+        </div>
+
+        <div>
+            ${percentage}%
+        </div>
+
+        ${
+            currentFile
+                ? `
+                    <div>
+                        In elaborazione:
+                        <strong>
+                            ${currentFile}
+                        </strong>
+                    </div>
+                `
+                : ""
+        }
+
+    `;
+
+}
+
+
+function showMassImportSummary(
+    element,
+    total,
+    imported,
+    errorsCount,
+    errors
+) {
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    let html = `
+
+        <div>
+            <strong>
+                IMPORTAZIONE COMPLETATA
+            </strong>
+        </div>
+
+        <div>
+            File selezionati:
+            ${total}
+        </div>
+
+        <div>
+            Importati:
+            ${imported}
+        </div>
+
+        <div>
+            Errori:
+            ${errorsCount}
+        </div>
+
+    `;
+
+
+    if (
+        errors.length
+    ) {
+
+        html += `
+
+            <div>
+                <strong>
+                    DETTAGLIO ERRORI
+                </strong>
+            </div>
+
+            <ul>
+
+                ${
+                    errors.map(
+                        error => `
+                            <li>
+                                <strong>
+                                    ${error.fileName}
+                                </strong>
+                                :
+                                ${error.message}
+                            </li>
+                        `
+                    ).join("")
+                }
+
+            </ul>
+
+        `;
+
+    }
+
+
+    element.innerHTML =
+        html;
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| UI IMPORTAZIONE MASSIVA
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const massImportButton =
+            document.getElementById(
+                "massImportButton"
+            );
+
+
+        const massFileInput =
+            document.getElementById(
+                "massFileInput"
+            );
+
+
+        if (
+            massImportButton &&
+            massFileInput
+        ) {
+
+            massImportButton.addEventListener(
+                "click",
+                () => {
+
+                    massFileInput.click();
+
+                }
+            );
+
+
+            massFileInput.addEventListener(
+                "change",
+                async event => {
+
+                    const files =
+                        event.target.files;
+
+
+                    if (
+                        !files ||
+                        !files.length
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    massImportButton.disabled =
+                        true;
+
+                    massImportButton.textContent =
+                        "IMPORTAZIONE...";
+
+
+                    try {
+
+                        await importMultipleExcelFiles(
+                            files
+                        );
+
+                    }
+                    catch (error) {
+
+                        console.error(
+                            "Errore importazione massiva:",
+                            error
+                        );
+
+
+                        const statusElement =
+                            document.getElementById(
+                                "massImportStatus"
+                            );
+
+
+                        if (statusElement) {
+
+                            statusElement.classList.remove(
+                                "hidden"
+                            );
+
+
+                            statusElement.innerHTML = `
+
+                                <div>
+                                    <strong>
+                                        Importazione massiva fallita
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    ${
+                                        error?.message ||
+                                        "Errore sconosciuto."
+                                    }
+                                </div>
+
+                            `;
+
+                        }
+
+                    }
+                    finally {
+
+                        massImportButton.disabled =
+                            false;
+
+                        massImportButton.textContent =
+                            "Importazione massiva";
+
+                        massFileInput.value =
+                            "";
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+);
