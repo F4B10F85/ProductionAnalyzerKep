@@ -1,7 +1,8 @@
 "use strict";
 
 
-let monthlyODCLExpanded = true;
+let monthlyODCLExpanded = false;
+let monthlyFamilyExpanded = false;
 
 /*
 |--------------------------------------------------------------------------
@@ -627,12 +628,6 @@ function renderMonthlyFamilyTable(
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Raggruppamento per ODCL
-    |--------------------------------------------------------------------------
-    */
-
     const grouped =
         new Map();
 
@@ -696,7 +691,7 @@ function renderMonthlyFamilyTable(
 
     /*
     |--------------------------------------------------------------------------
-    | Una riga per ogni ODCL
+    | Righe singoli ODCL
     |--------------------------------------------------------------------------
     */
 
@@ -715,6 +710,10 @@ function renderMonthlyFamilyTable(
                 document.createElement(
                     "tr"
                 );
+
+
+            row.className =
+                "monthly-family-detail-row";
 
 
             row.innerHTML = `
@@ -818,6 +817,10 @@ function renderMonthlyFamilyTable(
         );
 
 
+    quantityRow.className =
+        "monthly-family-total-row";
+
+
     quantityRow.innerHTML = `
 
         <td class="row-label">
@@ -906,15 +909,16 @@ function renderMonthlyFamilyTable(
     |--------------------------------------------------------------------------
     | Riga Lavorazione
     |--------------------------------------------------------------------------
-    |
-    | Qui POLO È inclusa nel totale economico.
-    |--------------------------------------------------------------------------
     */
 
     const valueRow =
         document.createElement(
             "tr"
         );
+
+
+    valueRow.className =
+        "monthly-family-total-row";
 
 
     valueRow.innerHTML = `
@@ -999,6 +1003,52 @@ function renderMonthlyFamilyTable(
     body.appendChild(
         valueRow
     );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stato iniziale: righe compresse
+    |--------------------------------------------------------------------------
+    */
+
+    monthlyFamilyExpanded =
+        false;
+
+
+    const detailRows =
+        body.querySelectorAll(
+            ".monthly-family-detail-row"
+        );
+
+
+    detailRows.forEach(
+        row => {
+
+            row.classList.add(
+                "hidden"
+            );
+
+        }
+    );
+
+
+    const toggle =
+        document.getElementById(
+            "monthlyFamilyToggle"
+        );
+
+
+    if (toggle) {
+
+        toggle.textContent =
+            "+";
+
+        toggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    }
 
 }
 
@@ -1281,7 +1331,30 @@ document.addEventListener(
     }
 );
 
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
+        const button =
+            document.getElementById(
+                "monthlyFamilyToggle"
+            );
+
+
+        if (!button) {
+
+            return;
+
+        }
+
+
+        button.addEventListener(
+            "click",
+            toggleMonthlyFamilyRows
+        );
+
+    }
+);
 
 
 /*
@@ -1633,7 +1706,6 @@ function renderEmptyODCL() {
 
 }
 
-
 function renderEmptyMonthly() {
 
     setText(
@@ -1680,15 +1752,21 @@ function renderEmptyMonthly() {
     );
 
 
-    const body =
+    /*
+    |--------------------------------------------------------------------------
+    | Tabella riepilogo famiglia
+    |--------------------------------------------------------------------------
+    */
+
+    const familyBody =
         document.getElementById(
             "monthlyFamilyBody"
         );
 
 
-    if (body) {
+    if (familyBody) {
 
-        body.innerHTML = `
+        familyBody.innerHTML = `
 
             <tr>
 
@@ -1706,16 +1784,22 @@ function renderEmptyMonthly() {
     }
 
 
-    const title =
+    /*
+    |--------------------------------------------------------------------------
+    | Titolo riepilogo ODCL
+    |--------------------------------------------------------------------------
+    */
+
+    const odclTitle =
         document.getElementById(
             "monthlyODCLTitle"
         );
 
 
-    if (title) {
+    if (odclTitle) {
 
         const label =
-            title.querySelector(
+            odclTitle.querySelector(
                 "span"
             );
 
@@ -1730,30 +1814,69 @@ function renderEmptyMonthly() {
     }
 
 
-    const toggle =
+    /*
+    |--------------------------------------------------------------------------
+    | Reset pulsante RIEPILOGO FAMIGLIA
+    |--------------------------------------------------------------------------
+    */
+
+    const familyToggle =
+        document.getElementById(
+            "monthlyFamilyToggle"
+        );
+
+
+    if (familyToggle) {
+
+        monthlyFamilyExpanded =
+            false;
+
+
+        familyToggle.textContent =
+            "+";
+
+
+        familyToggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reset pulsante RIEPILOGO ODCL
+    |--------------------------------------------------------------------------
+    */
+
+    const odclToggle =
         document.getElementById(
             "monthlyODCLToggle"
         );
 
 
-    if (toggle) {
+    if (odclToggle) {
 
         monthlyODCLExpanded =
-            true;
+            false;
 
 
-        toggle.textContent =
-            "−";
+        odclToggle.textContent =
+            "+";
 
 
-        toggle.setAttribute(
+        odclToggle.setAttribute(
             "aria-expanded",
-            "true"
+            "false"
         );
 
     }
 
 }
+
+
+
 
 /*
 |--------------------------------------------------------------------------
