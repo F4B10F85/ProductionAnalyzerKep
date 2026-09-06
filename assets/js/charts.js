@@ -1,17 +1,12 @@
 "use strict";
 
 
-let chartFamilyQuantity =
-    null;
-
-let chartFamilyValue =
-    null;
-
-let chartODCLValue =
-    null;
-
-let chartMonthlyValue =
-    null;
+let chartFamilyQuantity = null;
+let chartFamilyValue = null;
+let chartODCLValue = null;
+let chartODCLQuantity = null;
+let chartFamilyDistribution = null;
+let chartMonthlyValue = null;
 
 
 const CHART_FAMILIES = [
@@ -221,6 +216,14 @@ async function updateCharts() {
             odcl
         );
 
+        renderODCLQuantityChart(
+            periodRecords
+        );
+
+        renderFamilyDistributionChart(
+            periodRecords
+        );
+
 
         const yearRecords =
             await getRecordsByDateRange(
@@ -269,6 +272,14 @@ function updateChartsFromAnalysisData(
     renderODCLChart(
         records,
         ""
+    );
+
+    renderODCLQuantityChart(
+        records
+    );
+
+    renderFamilyDistributionChart(
+        records
     );
 
 
@@ -325,38 +336,19 @@ function updateChartsFromAnalysisData(
 
 function clearCharts() {
 
-    destroyChart(
-        chartFamilyQuantity
-    );
+    destroyChart(chartFamilyQuantity);
+    destroyChart(chartFamilyValue);
+    destroyChart(chartODCLValue);
+    destroyChart(chartODCLQuantity);
+    destroyChart(chartMonthlyValue);
+    destroyChart(chartFamilyDistribution);
 
-
-    destroyChart(
-        chartFamilyValue
-    );
-
-
-    destroyChart(
-        chartODCLValue
-    );
-
-
-    destroyChart(
-        chartMonthlyValue
-    );
-
-
-    chartFamilyQuantity =
-        null;
-
-    chartFamilyValue =
-        null;
-
-    chartODCLValue =
-        null;
-
-    chartMonthlyValue =
-        null;
-
+    chartFamilyQuantity = null;
+    chartFamilyValue = null;
+    chartODCLValue = null;
+    chartODCLQuantity = null;
+    chartMonthlyValue = null;
+    chartFamilyDistribution = null;
 }
 
 
@@ -607,6 +599,362 @@ function renderODCLChart(
 
 }
 
+function renderODCLQuantityChart(
+    records
+) {
+
+    const grouped =
+        new Map();
+
+
+    records.forEach(
+        record => {
+
+            const odcl =
+                String(
+                    record.odcl ?? ""
+                ).trim();
+
+
+            if (!odcl) {
+
+                return;
+
+            }
+
+
+            if (
+                !grouped.has(
+                    odcl
+                )
+            ) {
+
+                grouped.set(
+                    odcl,
+                    0
+                );
+
+            }
+
+
+            const classification =
+                record.classificazione ||
+                {};
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Quantità prodotta per ODCL
+            |--------------------------------------------------------------------------
+            |
+            | POLO esclusa.
+            |--------------------------------------------------------------------------
+            */
+
+            const quantity =
+                [
+                    "END-FAST",
+                    "E-LIGHT",
+                    "SMART",
+                    "KEPPY",
+                    "CR 2.0 T",
+                    "CR 2.0 S/B",
+                    "NOVA"
+                ]
+                .reduce(
+                    (
+                        sum,
+                        family
+                    ) =>
+                        sum +
+                        Number(
+                            classification[
+                                family
+                            ] ||
+                            0
+                        ),
+                    0
+                );
+
+
+            grouped.set(
+                odcl,
+                grouped.get(
+                    odcl
+                ) +
+                quantity
+            );
+
+        }
+    );
+
+
+    const labels =
+        [
+            ...grouped.keys()
+        ]
+        .sort(
+            (
+                a,
+                b
+            ) =>
+                a.localeCompare(
+                    b,
+                    "it",
+                    {
+                        numeric:
+                            true
+                    }
+                )
+        );
+
+
+    const data =
+        labels.map(
+            odcl =>
+                grouped.get(
+                    odcl
+                )
+        );
+
+
+    drawBarChart(
+        "chartODCLQuantity",
+        chartODCLQuantity,
+        labels,
+        data,
+        "Pezzi",
+        false,
+        instance => {
+
+            chartODCLQuantity =
+                instance;
+
+        }
+    );
+
+}
+
+function renderFamilyDistributionChart(
+    records
+) {
+
+    const quantities =
+        Object.fromEntries(
+            CHART_FAMILIES
+                .filter(
+                    family =>
+                        family !== "POLO"
+                )
+                .map(
+                    family =>
+                        [
+                            family,
+                            0
+                        ]
+                )
+        );
+
+
+    records.forEach(
+        record => {
+
+            const classification =
+                record.classificazione ||
+                {};
+
+
+            Object.keys(
+                quantities
+            )
+            .forEach(
+                family => {
+
+                    quantities[
+                        family
+                    ] +=
+                        Number(
+                            classification[
+                                family
+                            ] ||
+                            0
+                        );
+
+                }
+            );
+
+        }
+    );
+
+
+    const labels =
+        Object.keys(
+            quantities
+        );
+
+
+    const data =
+        labels.map(
+            family =>
+                quantities[
+                    family
+                ]
+        );
+
+
+    const canvas =
+        document.getElementById(
+            "chartFamilyDistribution"
+        );
+
+
+    if (!canvas) {
+
+        return;
+
+    }
+
+
+    destroyChart(
+        chartFamilyDistribution
+    );
+
+
+    chartFamilyDistribution =
+        new Chart(
+            canvas.getContext(
+                "2d"
+            ),
+            {
+
+                type:
+                    "doughnut",
+
+                data: {
+
+                    labels,
+
+                    datasets: [
+
+                        {
+
+                            data,
+
+                            backgroundColor: [
+
+                                "#2878c8",  // END-FAST
+                                "#65ced7",  // E-LIGHT
+                                "#0eb340",  // SMART
+                                "#99cd5ee2",  // KEPPY
+                                "#f2b134",  // CR 2.0 T
+                                "#e67e22",  // CR 2.0 S/B
+                                "#9b59b6"   // NOVA
+
+                            ],
+
+                            borderColor: "#000000",
+
+                            borderWidth:
+                                0.5
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive:
+                        true,
+
+                    maintainAspectRatio:
+                        false,
+
+                    plugins: {
+
+                        legend: {
+
+                            display:
+                                true,
+
+                            position:
+                                "right"
+                        },
+
+                        tooltip: {
+
+                            callbacks: {
+
+                                label(
+                                    context
+                                ) {
+
+                                    const value =
+                                        Number(
+                                            context.raw ||
+                                            0
+                                        );
+
+
+                                    const total =
+                                        data.reduce(
+                                            (
+                                                sum,
+                                                item
+                                            ) =>
+                                                sum +
+                                                Number(
+                                                    item ||
+                                                    0
+                                                ),
+                                            0
+                                        );
+
+
+                                    const percentage =
+                                        total > 0
+                                            ? (
+                                                value /
+                                                total
+                                            ) *
+                                              100
+                                            : 0;
+
+
+                                    return (
+                                        context.label +
+                                        ": " +
+                                        formatNumber(
+                                            value
+                                        ) +
+                                        " pezzi (" +
+                                        percentage.toLocaleString(
+                                            "it-IT",
+                                            {
+                                                minimumFractionDigits:
+                                                    1,
+                                                maximumFractionDigits:
+                                                    1
+                                            }
+                                        ) +
+                                        "%)"
+                                    );
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
 
 /*
 |--------------------------------------------------------------------------

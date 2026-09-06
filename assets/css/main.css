@@ -1853,10 +1853,96 @@ tbody tr:hover {
 
 #massImportButton {
     margin-top: 18px;
-    background: #c545bac2;
+    background: #45c5a1c2;
     color: #ffffff;
 }
 
 #massImportButton:hover {
     background: #565e64;
+}
+
+/* ==========================================================
+   RIEPILOGO FAMIGLIA - AZIONI
+   ========================================================== */
+
+.monthly-family-title {
+    position: relative;
+}
+
+
+.monthly-family-title-text {
+    text-align: center;
+}
+
+
+.monthly-family-actions {
+    position: absolute;
+
+    right: 12px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+.monthly-odcl-title .monthly-family-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Il + mantiene ESATTAMENTE il suo stile originale.
+| Cambiamo solo il posizionamento perché ora si trova
+| dentro il contenitore delle azioni.
+|--------------------------------------------------------------------------
+*/
+
+.monthly-family-actions .monthly-odcl-toggle {
+    position: static;
+
+    transform: none;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Pulsante Excel
+|--------------------------------------------------------------------------
+*/
+
+.monthly-excel-button {
+    height: 30px;
+
+    padding: 0 10px;
+
+    border: 1px solid #217346;
+    border-radius: 5px;
+
+    background: #2fa5dc;
+
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+
+.monthly-excel-button:hover {
+    background: #18245c;
+
+    border-color: #232a91;
 }

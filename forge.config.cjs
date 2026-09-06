@@ -1,5 +1,7 @@
 "use strict";
 
+const path = require("path");
+
 module.exports = {
 
     packagerConfig: {
@@ -12,6 +14,12 @@ module.exports = {
 
         appBundleId:
             "com.fabiofilippini.productionanalykerkep",
+
+        icon:
+            path.join(
+                __dirname,
+                "ingranaggi2"
+            ),
 
         asar:
             true
@@ -33,6 +41,7 @@ module.exports = {
             }
 
         },
+
 
         {
             name:

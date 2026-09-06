@@ -767,6 +767,32 @@ function renderMonthlyAnalysis() {
 
     }
 
+    const chartsTitle =
+        document.getElementById(
+            "monthlyChartsTitle"
+        );
+
+
+    if (chartsTitle) {
+
+        if (
+            year &&
+            month
+        ) {
+
+            chartsTitle.textContent =
+                `GRAFICI ANALISI PRODUZIONE - ${getMonthName(month).toUpperCase()} ${year}`;
+
+        }
+        else {
+
+            chartsTitle.textContent =
+                "GRAFICI ANALISI PRODUZIONE";
+
+        }
+
+    }
+
 
     const {
         start,
@@ -1519,6 +1545,182 @@ function renderMonthlyFamilyTable(
 
 /*
 |--------------------------------------------------------------------------
+| Esportazione Excel - Riepilogo per famiglia
+|--------------------------------------------------------------------------
+*/
+
+function exportMonthlyFamilyToExcel() {
+
+    const year =
+        document.getElementById(
+            "analysisYear"
+        )?.value || "";
+
+
+    const month =
+        document.getElementById(
+            "analysisMonth"
+        )?.value || "";
+
+
+    if (
+        !year ||
+        !month
+    ) {
+
+        alert(
+            "Seleziona prima anno e mese."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        typeof XLSX ===
+        "undefined"
+    ) {
+
+        alert(
+            "La libreria Excel non è disponibile."
+        );
+
+        return;
+
+    }
+
+
+    const table =
+        document.querySelector(
+            ".monthly-family-table"
+        );
+
+
+    if (!table) {
+
+        alert(
+            "Tabella Riepilogo per famiglia non trovata."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Conversione tabella HTML → Excel
+    |--------------------------------------------------------------------------
+    |
+    | display:false
+    | permette di esportare anche le righe
+    | nascoste dal pulsante "+".
+    |--------------------------------------------------------------------------
+    */
+
+    const workbook =
+        XLSX.utils.table_to_book(
+            table,
+            {
+                sheet:
+                    "Riepilogo Famiglia",
+
+                display:
+                    false
+            }
+        );
+
+
+    const worksheet =
+        workbook.Sheets[
+            "Riepilogo Famiglia"
+        ];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Larghezze colonne
+    |--------------------------------------------------------------------------
+    */
+
+    worksheet["!cols"] = [
+
+        {
+            wch: 18
+        },
+
+        {
+            wch: 14
+        },
+
+        {
+            wch: 14
+        },
+
+        {
+            wch: 14
+        },
+
+        {
+            wch: 14
+        },
+
+        {
+            wch: 14
+        },
+
+        {
+            wch: 14
+        },
+
+        {
+            wch: 14
+        },
+
+        {
+            wch: 14
+        },
+
+        {
+            wch: 14
+        }
+
+    ];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nome file
+    |--------------------------------------------------------------------------
+    */
+
+    const monthName =
+        getMonthName(
+            month
+        )
+        .toUpperCase();
+
+
+    const fileName =
+        `Riepilogo_Famiglia_${monthName}_${year}.xlsx`;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Download
+    |--------------------------------------------------------------------------
+    */
+
+    XLSX.writeFile(
+        workbook,
+        fileName
+    );
+
+}
+
+/*
+|--------------------------------------------------------------------------
 | Riepilogo mensile per ODCL
 |--------------------------------------------------------------------------
 */
@@ -1824,7 +2026,7 @@ function renderMonthlyODCL(
         if (label) {
 
             label.textContent =
-                `RIEPILOGO PER ODCL - ${getMonthName(month).toUpperCase()} ${year}`;
+                `RIEPILOGO PER OdCL - ${getMonthName(month).toUpperCase()} ${year}`;
 
         }
 
@@ -2312,7 +2514,7 @@ function renderEmptyMonthly() {
         if (label) {
 
             label.textContent =
-                "RIEPILOGO PER ODCL";
+                "RIEPILOGO PER OdCL";
 
         }
 
@@ -2562,6 +2764,102 @@ function showPageError(
 
 }
 
+/*
+|--------------------------------------------------------------------------
+| Esportazione Excel - Riepilogo per ODCL
+|--------------------------------------------------------------------------
+*/
+
+function exportMonthlyODCLToExcel() {
+
+    const year =
+        document.getElementById(
+            "analysisYear"
+        )?.value || "";
+
+
+    const month =
+        document.getElementById(
+            "analysisMonth"
+        )?.value || "";
+
+
+    if (
+        !year ||
+        !month
+    ) {
+
+        alert(
+            "Seleziona prima anno e mese."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        typeof XLSX ===
+        "undefined"
+    ) {
+
+        alert(
+            "La libreria Excel non è disponibile."
+        );
+
+        return;
+
+    }
+
+
+    const table =
+        document.querySelector(
+            ".odcl-table"
+        );
+
+
+    if (!table) {
+
+        alert(
+            "Tabella Riepilogo per ODCL non trovata."
+        );
+
+        return;
+
+    }
+
+
+    const workbook =
+        XLSX.utils.table_to_book(
+            table,
+            {
+                sheet:
+                    "Riepilogo ODCL",
+
+                display:
+                    false
+            }
+        );
+
+
+    const monthName =
+        getMonthName(
+            month
+        )
+        .toUpperCase();
+
+
+    const fileName =
+        `Riepilogo_ODCL_${monthName}_${year}.xlsx`;
+
+
+    XLSX.writeFile(
+        workbook,
+        fileName
+    );
+
+}
+
 function toggleMonthlyODCLRows() {
 
     const rows =
@@ -2699,6 +2997,36 @@ document.addEventListener(
             familyButton.addEventListener(
                 "click",
                 toggleMonthlyFamilyRows
+            );
+
+        }
+
+        const familyExcelButton =
+            document.getElementById(
+                "monthlyFamilyExcel"
+            );
+
+
+        if (familyExcelButton) {
+
+            familyExcelButton.addEventListener(
+                "click",
+                exportMonthlyFamilyToExcel
+            );
+
+        }
+
+        const odclExcelButton =
+            document.getElementById(
+                "monthlyODCLExcel"
+            );
+
+
+        if (odclExcelButton) {
+
+            odclExcelButton.addEventListener(
+                "click",
+                exportMonthlyODCLToExcel
             );
 
         }
