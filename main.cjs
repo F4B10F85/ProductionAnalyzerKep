@@ -691,6 +691,35 @@ function deleteImport(
 
 }
 
+function deleteAllImports() {
+
+    const db =
+        getDatabase();
+
+
+    const transaction =
+        db.transaction(
+            () => {
+
+                db.prepare(
+                    "DELETE FROM records"
+                ).run();
+
+
+                db.prepare(
+                    "DELETE FROM imports"
+                ).run();
+
+            }
+        );
+
+
+    transaction();
+
+
+    return true;
+
+}
 
 function registerDatabaseHandlers() {
 
@@ -762,6 +791,12 @@ function registerDatabaseHandlers() {
             deleteImport(
                 importId
             )
+    );
+
+    ipcMain.handle(
+        "db:deleteAllImports",
+        () =>
+            deleteAllImports()
     );
 
 

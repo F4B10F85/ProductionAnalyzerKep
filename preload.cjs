@@ -11,5 +11,6 @@ contextBridge.exposeInMainWorld("productionAPI", {
     getRecordsByODCL: odcl => ipcRenderer.invoke("db:getRecordsByODCL", odcl),
     getAllRecords: () => ipcRenderer.invoke("db:getAllRecords"),
     deleteImport: importId => ipcRenderer.invoke("db:deleteImport", importId),
+    deleteAllImports: () => ipcRenderer.invoke("db:deleteAllImports"),
     getDatabasePath: () => ipcRenderer.invoke("db:getDatabasePath")
 });

@@ -926,6 +926,71 @@ async function deleteImportIndexedDB(
 
 }
 
+async function deleteAllImportsIndexedDB() {
+
+    const db =
+        await openIndexedDB();
+
+
+    await new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const transaction =
+                db.transaction(
+                    [
+                        IMPORTS_COLLECTION,
+                        RECORDS_COLLECTION
+                    ],
+                    "readwrite"
+                );
+
+
+            transaction.objectStore(
+                IMPORTS_COLLECTION
+            ).clear();
+
+
+            transaction.objectStore(
+                RECORDS_COLLECTION
+            ).clear();
+
+
+            transaction.oncomplete =
+                resolve;
+
+
+            transaction.onerror =
+                () => {
+
+                    reject(
+                        transaction.error ||
+                        new Error(
+                            "Errore durante l'eliminazione di tutti i dati."
+                        )
+                    );
+
+                };
+
+
+            transaction.onabort =
+                () => {
+
+                    reject(
+                        transaction.error ||
+                        new Error(
+                            "Eliminazione di tutti i dati annullata."
+                        )
+                    );
+
+                };
+
+        }
+    );
+
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -1161,6 +1226,20 @@ async function deleteImport(
 
 }
 
+async function deleteAllImports() {
+
+    const result =
+        isElectron
+            ? await window.productionAPI.deleteAllImports()
+            : await deleteAllImportsIndexedDB();
+
+
+    invalidateStorageCaches();
+
+
+    return result;
+
+}
 
 function getLocalDatabasePath() {
 

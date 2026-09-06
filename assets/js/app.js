@@ -320,7 +320,7 @@ importButton.addEventListener(
         if (!odcl) {
 
             showStatus(
-                "Il numero ODCL è obbligatorio.",
+                "Il numero OdCL è obbligatorio.",
                 "error"
             );
 

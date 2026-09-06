@@ -1946,3 +1946,48 @@ tbody tr:hover {
 
     border-color: #232a91;
 }
+
+/* ==========================================================
+   ARCHIVIO - AZIONI
+   ========================================================== */
+
+.archive-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.button-danger {
+    border: 0;
+
+    border-radius: 6px;
+
+    padding: 10px 17px;
+
+    font-size: 14px;
+
+    color: #ffffff;
+
+    background: #c54545;
+
+    cursor: pointer;
+
+    transition:
+        background-color 120ms ease,
+        opacity 120ms ease;
+}
+
+
+.button-danger:hover {
+    background: #a93636;
+}
+
+
+.button-danger:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+}

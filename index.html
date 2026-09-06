@@ -264,7 +264,7 @@
                 <div class="page-heading">
 
                     <h1>
-                        IMPORTAZIONE
+                        IMPORTAZIONE Ordini di Conto Lavoro M.V. Montaggi
                     </h1>
 
                     <p>
@@ -397,7 +397,7 @@
 
                                 <label for="odclInput">
 
-                                    Numero ODCL
+                                    Numero OdCL
 
                                     <span class="required">
                                         *
@@ -411,7 +411,7 @@
                                     type="text"
                                     inputmode="numeric"
                                     autocomplete="off"
-                                    placeholder="Inserisci numero ODCL"
+                                    placeholder="Inserisci numero OdCL"
                                 >
 
 
@@ -550,14 +550,25 @@
 
                         </div>
 
+                        <div class="archive-actions">
 
-                        <button
-                            id="refreshArchiveButton"
-                            type="button"
-                            class="button-secondary"
-                        >
-                            Aggiorna archivio
-                        </button>
+                            <button
+                                id="refreshArchiveButton"
+                                type="button"
+                                class="button-secondary"
+                            >
+                                Aggiorna archivio
+                            </button>
+
+                            <button
+                                id="deleteAllArchiveButton"
+                                type="button"
+                                class="button-danger"
+                            >
+                                Elimina tutti i dati
+                            </button>
+
+                        </div>
 
                     </div>
 
@@ -695,7 +706,7 @@
                 <div class="page-heading">
 
                     <h1>
-                        ANALISI PRODUZIONE
+                        ANALISI PRODUZIONE Ordini di Conto Lavoro M.V. Montaggi
                     </h1>
 
                 </div>
@@ -1404,6 +1415,86 @@
                 showSection(
                     "import"
                 );
+
+                const deleteAllArchiveButton =
+                    document.getElementById(
+                        "deleteAllArchiveButton"
+                    );
+
+
+                if (deleteAllArchiveButton) {
+
+                    deleteAllArchiveButton.addEventListener(
+                        "click",
+                        async () => {
+
+                            const confirmed =
+                                window.confirm(
+                                    "ATTENZIONE!\n\n" +
+                                    "Stai per eliminare TUTTI i dati dell'archivio ODCL.\n\n" +
+                                    "Verranno eliminate tutte le importazioni e tutti i record associati.\n\n" +
+                                    "L'operazione è irreversibile.\n\n" +
+                                    "Continuare?"
+                                );
+
+
+                            if (!confirmed) {
+
+                                return;
+
+                            }
+
+
+                            deleteAllArchiveButton.disabled =
+                                true;
+
+
+                            try {
+
+                                await deleteAllImports();
+
+
+                                if (
+                                    typeof loadArchive ===
+                                    "function"
+                                ) {
+
+                                    await loadArchive();
+
+                                }
+
+
+                                alert(
+                                    "Tutti i dati dell'archivio sono stati eliminati."
+                                );
+
+                            }
+                            catch (
+                                error
+                            ) {
+
+                                console.error(
+                                    "Errore eliminazione completa archivio:",
+                                    error
+                                );
+
+
+                                alert(
+                                    "Errore durante l'eliminazione di tutti i dati."
+                                );
+
+                            }
+                            finally {
+
+                                deleteAllArchiveButton.disabled =
+                                    false;
+
+                            }
+
+                        }
+                    );
+
+                }
 
             }
         );

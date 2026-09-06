@@ -81,7 +81,7 @@ async function readExcelFile(
     if (!odcl) {
 
         throw new Error(
-            "Il numero ODCL è obbligatorio."
+            "Il numero OdCL è obbligatorio."
         );
 
     }
