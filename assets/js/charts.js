@@ -8,6 +8,7 @@ let chartODCLQuantity = null;
 let chartFamilyDistribution = null;
 let chartMonthlyValue = null;
 let chartMonthlyQuantity = null;
+let chartMonthlyDailyQuantity = null;
 
 const CHART_FAMILIES = [
 
@@ -35,6 +36,23 @@ const CHART_FAMILY_LABELS = [
     "POLO"
 
 ];
+
+const GIORNI_LAVORATIVI = {
+
+    "01": 18,
+    "02": 20,
+    "03": 22,
+    "04": 22,
+    "05": 20,
+    "06": 20,
+    "07": 23,
+    "08": 16,
+    "09": 22,
+    "10": 22,
+    "11": 21,
+    "12": 18
+
+};
 
 
 let chartsInitialized =
@@ -242,6 +260,11 @@ async function updateCharts() {
             year
         );
 
+        renderMonthlyDailyQuantityChart(
+            yearRecords,
+            year
+        );
+
     }
     catch (
         error
@@ -327,6 +350,12 @@ function updateChartsFromAnalysisData(
                     String(year)
                 );
 
+
+                renderMonthlyDailyQuantityChart(
+                    recordsForYear,
+                    String(year)
+                );
+
             }
         )
         .catch(
@@ -356,7 +385,8 @@ function clearCharts() {
     destroyChart(chartODCLQuantity);
     destroyChart(chartMonthlyValue);
     destroyChart(chartFamilyDistribution);
-    destroyChart(chartMonthlyQuantity);    
+    destroyChart(chartMonthlyQuantity);  
+    destroyChart(chartMonthlyDailyQuantity);  
 
     chartFamilyQuantity = null;
     chartFamilyValue = null;
@@ -364,6 +394,8 @@ function clearCharts() {
     chartODCLQuantity = null;
     chartMonthlyValue = null;
     chartFamilyDistribution = null;
+    chartMonthlyQuantity = null;
+    chartMonthlyDailyQuantity = null;   
 }
 
 
@@ -1118,16 +1150,20 @@ function renderMonthlyChart(
                                 values,
 
                             borderWidth:
-                                3,
+                                2,
+
+                            borderColor: "#189c3564",
+
+                            backgroundColor: "#189c34ac",
 
                             tension:
                                 0.25,
 
                             pointRadius:
-                                4,
+                                6,
 
                             pointHoverRadius:
-                                6
+                                10
 
                         }
 
@@ -1307,6 +1343,8 @@ function renderMonthlyQuantityChart(
                             borderWidth:
                                 0,
 
+                            backgroundColor: "#189c34ac",
+
                             borderRadius:
                                 5
 
@@ -1329,6 +1367,252 @@ function renderMonthlyQuantityChart(
         );
 
 }
+
+/*
+|--------------------------------------------------------------------------
+| GRAFICO CASCHI MEDIA GIORNO
+|--------------------------------------------------------------------------
+*/
+
+function renderMonthlyDailyQuantityChart(
+    records,
+    year
+) {
+
+    const quantities =
+        Array(12).fill(0);
+
+
+    records.forEach(
+        record => {
+
+            const date =
+                String(
+                    record.dataConsegna ?? ""
+                ).trim();
+
+
+            const match =
+                date.match(
+                    /^(\d{4})-(\d{2})-\d{2}$/
+                );
+
+
+            if (
+                !match ||
+                match[1] !== String(year)
+            ) {
+
+                return;
+
+            }
+
+
+            const month =
+                match[2];
+
+
+            const monthIndex =
+                Number(month) - 1;
+
+
+            if (
+                monthIndex < 0 ||
+                monthIndex > 11
+            ) {
+
+                return;
+
+            }
+
+
+            const classification =
+                record.classificazione ||
+                {};
+
+
+            quantities[monthIndex] +=
+                QUANTITY_FAMILIES.reduce(
+                    (
+                        sum,
+                        family
+                    ) =>
+                        sum +
+                        Number(
+                            classification[
+                                family.key
+                            ] ||
+                            0
+                        ),
+                    0
+                );
+
+        }
+    );
+
+
+    const dailyQuantities =
+        quantities.map(
+            (
+                quantity,
+                index
+            ) => {
+
+                const month =
+                    String(
+                        index + 1
+                    )
+                    .padStart(
+                        2,
+                        "0"
+                    );
+
+
+                const workingDays =
+                    GIORNI_LAVORATIVI[
+                        month
+                    ] || 0;
+
+
+                return workingDays > 0
+                    ? quantity /
+                      workingDays
+                    : 0;
+
+            }
+        );
+
+
+    const canvas =
+        document.getElementById(
+            "chartMonthlyDailyQuantity"
+        );
+
+
+    if (!canvas) {
+
+        return;
+
+    }
+
+
+    destroyChart(
+        chartMonthlyDailyQuantity
+    );
+
+
+    chartMonthlyDailyQuantity =
+        new Chart(
+            canvas.getContext("2d"),
+            {
+
+                type: "bar",
+
+                data: {
+
+                    labels: [
+
+                        "Gen",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "Mag",
+                        "Giu",
+                        "Lug",
+                        "Ago",
+                        "Set",
+                        "Ott",
+                        "Nov",
+                        "Dic"
+
+                    ],
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Caschi / giorno",
+
+                            data:
+                                dailyQuantities,
+
+                            borderWidth:
+                                0,
+
+                            backgroundColor: "#189c34ac",
+
+                            borderRadius:
+                                5
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    ...baseChartOptions({
+
+                        currency:
+                            false
+
+                    }),
+
+                    scales: {
+
+                        ...baseChartOptions({
+
+                            currency:
+                                false
+
+                        }).scales,
+
+                        y: {
+
+                            ...baseChartOptions({
+
+                                currency:
+                                    false
+
+                            }).scales.y,
+
+                            ticks: {
+
+                                callback(
+                                    value
+                                ) {
+
+                                    return Number(
+                                        value
+                                    )
+                                    .toLocaleString(
+                                        "it-IT",
+                                        {
+                                            minimumFractionDigits:
+                                                1,
+
+                                            maximumFractionDigits:
+                                                1
+                                        }
+                                    );
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
 
 /*
 |--------------------------------------------------------------------------
@@ -1386,6 +1670,8 @@ function drawBarChart(
                                 datasetLabel,
 
                             data,
+
+                            backgroundColor: "#189c34ac",
 
                             borderWidth:
                                 0,

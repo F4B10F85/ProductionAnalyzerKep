@@ -1464,7 +1464,7 @@ tbody tr:hover {
 .chart-card-title {
     margin-bottom: 12px;
 
-    color: #0b4ea2;
+    color: #a2310b;
 
     font-size: 14px;
 
@@ -1992,9 +1992,7 @@ tbody tr:hover {
     cursor: not-allowed;
 }
 
-.chart-card-wide {
-    grid-column: 1 / -1;
-}
+
 
 
 /* ==========================================================
