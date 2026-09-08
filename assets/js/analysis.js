@@ -1195,13 +1195,13 @@ function renderMonthlyFamilyTable(
 
 
     quantityRow.className =
-        "monthly-family-total-row";
+        "monthly-family-quantity-row";
 
 
     quantityRow.innerHTML = `
 
         <td class="row-label">
-            Quantità
+            Quantità Totale
         </td>
 
         <td>
@@ -1344,6 +1344,17 @@ function renderMonthlyFamilyTable(
         quantityRow
     );
 
+    quantityRow
+    .querySelectorAll("td")
+    .forEach(
+        cell => {
+
+            cell.style.fontWeight =
+                "800";
+
+        }
+    );
+
     /*
     |--------------------------------------------------------------------------
     | Riga Costo / pezzo
@@ -1458,7 +1469,7 @@ function renderMonthlyFamilyTable(
 
 
     valueRow.className =
-        "monthly-family-total-row";
+        "monthly-family-value-row";
 
 
     valueRow.innerHTML = `
@@ -1742,6 +1753,10 @@ function exportMonthlyFamilyToExcel() {
         workbook.Sheets[
             "Riepilogo Famiglia"
         ];
+
+    convertEuroCellsToNumbers(
+        worksheet
+    );
 
 
     /*
@@ -2947,6 +2962,15 @@ function exportMonthlyODCLToExcel() {
             }
         );
 
+    const worksheet =
+        workbook.Sheets[
+            "Riepilogo ODCL"
+        ];
+
+
+    convertEuroCellsToNumbers(
+        worksheet
+    );
 
     const monthName =
         getMonthName(
@@ -3139,3 +3163,114 @@ document.addEventListener(
 
     }
 );
+
+function convertEuroCellsToNumbers(
+    worksheet
+) {
+
+    Object.keys(
+        worksheet
+    ).forEach(
+        cellAddress => {
+
+            if (
+                cellAddress.startsWith("!")
+            ) {
+
+                return;
+
+            }
+
+
+            const cell =
+                worksheet[
+                    cellAddress
+                ];
+
+
+            if (
+                !cell ||
+                typeof cell.v !==
+                    "string"
+            ) {
+
+                return;
+
+            }
+
+
+            const value =
+                cell.v.trim();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Convertiamo solo valori realmente monetari.
+            |--------------------------------------------------------------------------
+            |
+            | Esempi convertibili:
+            |
+            | "3,50 €"
+            | "1.234,50 €"
+            | "-25,00 €"
+            |
+            | NON convertiamo:
+            |
+            | "Costo/pezzo (€)"
+            | "Lavorazione (€)"
+            |--------------------------------------------------------------------------
+            */
+
+            const match =
+                value.match(
+                    /-?[\d.]+(?:,\d+)?\s*€/
+                );
+
+
+            if (!match) {
+
+                return;
+
+            }
+
+
+            const numericValue =
+                Number(
+                    match[0]
+                        .replace(
+                            /\s*€/,
+                            ""
+                        )
+                        .replace(
+                            /\./g,
+                            ""
+                        )
+                        .replace(
+                            ",",
+                            "."
+                        )
+                );
+
+
+            if (
+                !Number.isFinite(
+                    numericValue
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            cell.v =
+                numericValue;
+
+
+            cell.t =
+                "n";
+
+        }
+    );
+
+}

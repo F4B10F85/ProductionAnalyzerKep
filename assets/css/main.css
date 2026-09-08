@@ -974,7 +974,7 @@ tbody tr:hover {
     border-radius: 6px;
 
     background: #ffffff;
-    color: #17202b;
+    color: #2b2417;
 
     font-family: inherit;
     font-size: 18px;
@@ -1693,12 +1693,12 @@ tbody tr:hover {
 
 .monthly-family-table tbody tr:nth-last-child(2) td {
     background: #f2f6fc;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .monthly-family-table tbody tr:last-child td {
     background: #f9fddf;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .kpi-icon img {

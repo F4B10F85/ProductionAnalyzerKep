@@ -532,15 +532,7 @@ input {
     font-weight: 800 !important;
 }
 
-.monthly-family-table th,
-.monthly-family-table td {
-    height: 34px;
-}
 
-.monthly-family-table td {
-    font-size: 14px;
-    font-weight: 500;
-}
 
 .monthly-family-table .row-label {
     font-size: 14px !important;
@@ -805,4 +797,10 @@ input {
 .content::-webkit-scrollbar-thumb {
     background: #b8c1cc;
     border-radius: 20px;
+}
+
+
+.monthly-family-quantity-row td,
+.monthly-family-value-row td {
+    font-weight: 800 !important;
 }
