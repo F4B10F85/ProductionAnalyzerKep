@@ -1344,6 +1344,112 @@ function renderMonthlyFamilyTable(
         quantityRow
     );
 
+    /*
+    |--------------------------------------------------------------------------
+    | Riga Costo / pezzo
+    |--------------------------------------------------------------------------
+    */
+
+    const unitCostRow =
+        document.createElement(
+            "tr"
+        );
+
+
+    unitCostRow.className =
+        "monthly-family-total-row";
+
+
+    unitCostRow.innerHTML = `
+        
+        <td class="row-label">
+            Costo/pezzo (€)
+        </td>
+
+
+        <td>
+            ${formatCurrency(
+                TARIFFE_LAVORAZIONE[
+                    "END-FAST"
+                ]
+            )}
+        </td>
+
+
+        <td>
+            ${formatCurrency(
+                TARIFFE_LAVORAZIONE[
+                    "E-LIGHT"
+                ]
+            )}
+        </td>
+
+
+        <td>
+            ${formatCurrency(
+                TARIFFE_LAVORAZIONE[
+                    "SMART"
+                ]
+            )}
+        </td>
+
+
+        <td>
+            ${formatCurrency(
+                TARIFFE_LAVORAZIONE[
+                    "KEPPY"
+                ]
+            )}
+        </td>
+
+
+        <td>
+            ${formatCurrency(
+                TARIFFE_LAVORAZIONE[
+                    "CR 2.0 T"
+                ]
+            )}
+        </td>
+
+
+        <td>
+            ${formatCurrency(
+                TARIFFE_LAVORAZIONE[
+                    "CR 2.0 S/B"
+                ]
+            )}
+        </td>
+
+
+        <td>
+            ${formatCurrency(
+                TARIFFE_LAVORAZIONE[
+                    "NOVA"
+                ]
+            )}
+        </td>
+
+
+        <td>
+            ${formatCurrency(
+                TARIFFE_LAVORAZIONE[
+                    "POLO"
+                ]
+            )}
+        </td>
+
+
+        <td class="total-cell">
+            —
+        </td>
+
+    `;
+
+
+    body.appendChild(
+        unitCostRow
+    );
+
 
     const valueRow =
         document.createElement(

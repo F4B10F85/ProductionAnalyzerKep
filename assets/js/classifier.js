@@ -170,11 +170,14 @@ function classifyRecord(record) {
     |--------------------------------------------------------------------------
     |
     | KP nel CODICE
+    | AND
+    | KEPPY nella DESCRIZIONE
     |
     */
 
     const isKeppy =
-        codice.includes("KP");
+        codice.includes("KP") &&
+        descrizione.includes("KEPPY");
 
 
     /*

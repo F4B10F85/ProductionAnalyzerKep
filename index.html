@@ -214,6 +214,22 @@
 
                 </button>
 
+                <button
+                    type="button"
+                    class="nav-item"
+                    data-section="statistics"
+                >
+
+                    <span class="nav-icon">
+                        📈
+                    </span>
+
+                    <span>
+                        STATISTICHE
+                    </span>
+
+                </button>
+
             </nav>
 
 
@@ -1198,27 +1214,391 @@
 
                         <!-- DISTRIBUZIONE DELLA PRODUZIONE PER FAMIGLIA -->
 
-                            <div class="chart-card">
+                        <div class="chart-card">
 
-                                <div class="chart-card-title">
-                                    DISTRIBUZIONE DELLA PRODUZIONE PER FAMIGLIA
-                                </div>
-
-                                <div class="chart-container">
-                                    <canvas id="chartFamilyDistribution"></canvas>
-                                </div>
-
+                            <div class="chart-card-title">
+                                DISTRIBUZIONE DELLA PRODUZIONE PER FAMIGLIA
                             </div>
+
+                            <div class="chart-container">
+                                <canvas id="chartFamilyDistribution"></canvas>
+                            </div>
+
+                        </div>
+
+                        <!-- CASCHI PRODOTTI PER MESE  -->
+
+                        <div class="chart-card chart-card-wide">
+
+                            <div class="chart-card-title">
+                                CASCHI PRODOTTI PER MESE
+                            </div>
+
+                            <div class="chart-container">
+                                <canvas id="chartMonthlyQuantity"></canvas>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+            <!-- =================================================
+                STATISTICHE
+                ================================================= -->
+
+            <section
+                id="workspaceStatistics"
+                class="workspace-section hidden"
+            >
+
+                <div class="page-heading">
+
+                    <h1>
+                        STATISTICHE PRODUZIONE
+                    </h1>
+
+                    <p>
+                        Indicatori sintetici della produzione e della lavorazione.
+                    </p>
+
+                </div>
+
+
+                <!-- FILTRI -->
+
+                <section class="analysis-panel statistics-panel">
+
+                    <div class="panel-title">
+                        PERIODO
+                    </div>
+
+
+                    <div class="filter-row">
+
+                        <div class="field">
+
+                            <label for="statisticsYear">
+                                Anno
+                            </label>
+
+                            <select id="statisticsYear">
+                                <option value="">
+                                    Anno
+                                </option>
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="statisticsMonth">
+                                Mese
+                            </label>
+
+                            <select id="statisticsMonth">
+
+                                <option value="">
+                                    Tutto l'anno
+                                </option>
+
+                            </select>
+
+                        </div>
 
                     </div>
 
                 </section>
 
 
+                <!-- KPI -->
+
+                <section class="analysis-panel statistics-panel">
+
+                    <div class="panel-title">
+                        PRODUZIONE
+                    </div>
+
+
+                    <div class="statistics-grid">
+
+                        <article class="statistics-card">
+
+                            <div class="statistics-label">
+                                CASCHI PRODOTTI
+                            </div>
+
+                            <div
+                                id="statCaschiPeriodo"
+                                class="statistics-value blue"
+                            >
+                                0
+                            </div>
+
+                            <div
+                                id="statCaschiPeriodoNote"
+                                class="statistics-note"
+                            >
+                                periodo selezionato
+                            </div>
+
+                        </article>
+
+
+                        <article class="statistics-card">
+
+                            <div class="statistics-label">
+                                MEDIA CASCHI / MESE
+                            </div>
+
+                            <div
+                                id="statMediaCaschi"
+                                class="statistics-value blue"
+                            >
+                                0
+                            </div>
+
+                            <div class="statistics-note">
+                                media mensile
+                            </div>
+
+                        </article>
+
+
+                        <article class="statistics-card">
+
+                            <div class="statistics-label">
+                                PICCO PRODUZIONE
+                            </div>
+
+                            <div
+                                id="statPiccoProduzione"
+                                class="statistics-value green"
+                            >
+                                0
+                            </div>
+
+                            <div
+                                id="statPiccoProduzioneNote"
+                                class="statistics-note"
+                            >
+                                -
+                            </div>
+
+                        </article>
+
+
+                        <article class="statistics-card">
+
+                            <div class="statistics-label">
+                                MINIMA PRODUZIONE
+                            </div>
+
+                            <div
+                                id="statMinProduzione"
+                                class="statistics-value orange"
+                            >
+                                0
+                            </div>
+
+                            <div
+                                id="statMinProduzioneNote"
+                                class="statistics-note"
+                            >
+                                -
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </section>
+
+
+                <!-- LAVORAZIONE -->
+
+                <section class="analysis-panel statistics-panel">
+
+                    <div class="panel-title">
+                        LAVORAZIONE
+                    </div>
+
+
+                    <div class="statistics-grid">
+
+                        <article class="statistics-card">
+
+                            <div class="statistics-label">
+                                LAVORAZIONE
+                            </div>
+
+                            <div
+                                id="statLavorazionePeriodo"
+                                class="statistics-value green"
+                            >
+                                0,00 €
+                            </div>
+
+                            <div
+                                id="statLavorazionePeriodoNote"
+                                class="statistics-note"
+                            >
+                                periodo selezionato
+                            </div>
+
+                        </article>
+
+
+                        <article class="statistics-card">
+
+                            <div class="statistics-label">
+                                MEDIA LAVORAZIONE / MESE
+                            </div>
+
+                            <div
+                                id="statMediaLavorazione"
+                                class="statistics-value green"
+                            >
+                                0,00 €
+                            </div>
+
+                            <div class="statistics-note">
+                                media mensile
+                            </div>
+
+                        </article>
+
+
+                        <article class="statistics-card">
+
+                            <div class="statistics-label">
+                                MEDIA LAVORAZIONE / CASCO
+                            </div>
+
+                            <div
+                                id="statMediaPerCasco"
+                                class="statistics-value purple"
+                            >
+                                0,00 €
+                            </div>
+
+                            <div class="statistics-note">
+                                valore medio
+                            </div>
+
+                        </article>
+
+
+                        <article class="statistics-card">
+
+                            <div class="statistics-label">
+                                FAMIGLIA PRINCIPALE
+                            </div>
+
+                            <div
+                                id="statFamigliaPrincipale"
+                                class="statistics-value"
+                            >
+                                -
+                            </div>
+
+                            <div
+                                id="statFamigliaPrincipaleNote"
+                                class="statistics-note"
+                            >
+                                0 pezzi
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </section>
+
+
+                <!-- CONFRONTO -->
+
+                <section class="statistics-two-column">
+
+                    <!-- =================================================
+                        TABELLA PRODUZIONE ANNUALE PER FAMIGLIA
+                        ================================================= -->
+
+                    <section class="analysis-panel statistics-panel">
+
+                        <div class="panel-title">
+                            PRODUZIONE ANNUALE PER FAMIGLIA
+                        </div>
+
+
+                        <div class="statistics-table-wrap">
+
+                            <table class="statistics-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            Famiglia
+                                        </th>
+
+                                        <th>
+                                            Totale annuale
+                                        </th>
+
+                                        <th>
+                                            % sul totale
+                                        </th>
+
+                                        <th>
+                                            Media mensile
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody id="statisticsFamilyBody">
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =================================================
+                        DISTRIBUZIONE PRODUZIONE PER FAMIGLIA
+                        ================================================= -->
+
+                    <section class="analysis-panel statistics-panel">
+
+                        <div class="panel-title">
+                            DISTRIBUZIONE PRODUZIONE PER FAMIGLIA
+                        </div>
+
+
+                        <div class="statistics-pie-container">
+
+                            <canvas
+                                id="statisticsFamilyPieChart"
+                            ></canvas>
+
+                        </div>
+
+                    </section>
+
+                </section>
 
             </section>
-
-
+      
         </main>
 
     </div>
@@ -1263,6 +1643,7 @@
     <script src="assets/js/storage.js"></script>
     <script src="assets/js/classifier.js"></script>
     <script src="assets/js/analysis.js"></script>
+    <script src="assets/js/statistics.js"></script>
     <script src="assets/js/charts.js"></script>
     <script src="assets/js/app.js"></script>
 
@@ -1298,6 +1679,11 @@
                     analysis:
                         document.getElementById(
                             "workspaceAnalysis"
+                        ),
+
+                    statistics:
+                        document.getElementById(
+                            "workspaceStatistics"
                         )
 
                 };
@@ -1386,6 +1772,22 @@
                         ) {
 
                             initializeAnalysisPage();
+
+                        }
+
+                    }
+
+                    if (
+                        sectionName ===
+                        "statistics"
+                    ) {
+
+                        if (
+                            typeof initializeStatistics ===
+                            "function"
+                        ) {
+
+                            initializeStatistics();
 
                         }
 

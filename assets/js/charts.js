@@ -7,7 +7,7 @@ let chartODCLValue = null;
 let chartODCLQuantity = null;
 let chartFamilyDistribution = null;
 let chartMonthlyValue = null;
-
+let chartMonthlyQuantity = null;
 
 const CHART_FAMILIES = [
 
@@ -237,6 +237,11 @@ async function updateCharts() {
             year
         );
 
+        renderMonthlyQuantityChart(
+            yearRecords,
+            year
+        );
+
     }
     catch (
         error
@@ -309,11 +314,20 @@ function updateChartsFromAnalysisData(
             `${numericYear + 1}-01-01`
         )
         .then(
-            recordsForYear =>
+            recordsForYear => {
+
                 renderMonthlyChart(
                     recordsForYear,
                     String(year)
-                )
+                );
+
+
+                renderMonthlyQuantityChart(
+                    recordsForYear,
+                    String(year)
+                );
+
+            }
         )
         .catch(
             error =>
@@ -342,6 +356,7 @@ function clearCharts() {
     destroyChart(chartODCLQuantity);
     destroyChart(chartMonthlyValue);
     destroyChart(chartFamilyDistribution);
+    destroyChart(chartMonthlyQuantity);    
 
     chartFamilyQuantity = null;
     chartFamilyValue = null;
@@ -1131,6 +1146,189 @@ function renderMonthlyChart(
 
 }
 
+/*
+|--------------------------------------------------------------------------
+| GRAFICO ANNUALE
+|--------------------------------------------------------------------------
+*/
+
+function renderMonthlyQuantityChart(
+    records,
+    year
+) {
+
+    const quantities =
+        Array(
+            12
+        ).fill(
+            0
+        );
+
+
+    records.forEach(
+        record => {
+
+            const date =
+                String(
+                    record.dataConsegna ?? ""
+                ).trim();
+
+
+            const match =
+                date.match(
+                    /^(\d{4})-(\d{2})-\d{2}$/
+                );
+
+
+            if (
+                !match ||
+                match[1] !==
+                String(year)
+            ) {
+
+                return;
+
+            }
+
+
+            const monthIndex =
+                Number(
+                    match[2]
+                ) - 1;
+
+
+            if (
+                monthIndex < 0 ||
+                monthIndex > 11
+            ) {
+
+                return;
+
+            }
+
+
+            const classification =
+                record.classificazione ||
+                {};
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CASCHI TOTALI
+            |--------------------------------------------------------------------------
+            |
+            | Sommiamo tutte le famiglie di caschi.
+            |
+            | POLO ESCLUSA.
+            |--------------------------------------------------------------------------
+            */
+
+            quantities[
+                monthIndex
+            ] +=
+                QUANTITY_FAMILIES.reduce(
+                    (
+                        sum,
+                        family
+                    ) =>
+                        sum +
+                        Number(
+                            classification[
+                                family.key
+                            ] ||
+                            0
+                        ),
+                    0
+                );
+
+        }
+    );
+
+
+    const canvas =
+        document.getElementById(
+            "chartMonthlyQuantity"
+        );
+
+
+    if (!canvas) {
+
+        return;
+
+    }
+
+
+    destroyChart(
+        chartMonthlyQuantity
+    );
+
+
+    chartMonthlyQuantity =
+        new Chart(
+            canvas.getContext(
+                "2d"
+            ),
+            {
+
+                type:
+                    "bar",
+
+
+                data: {
+
+                    labels: [
+
+                        "Gen",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "Mag",
+                        "Giu",
+                        "Lug",
+                        "Ago",
+                        "Set",
+                        "Ott",
+                        "Nov",
+                        "Dic"
+
+                    ],
+
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Caschi prodotti",
+
+                            data:
+                                quantities,
+
+                            borderWidth:
+                                0,
+
+                            borderRadius:
+                                5
+
+                        }
+
+                    ]
+
+                },
+
+
+                options:
+                    baseChartOptions({
+
+                        currency:
+                            false
+
+                    })
+
+            }
+        );
+
+}
 
 /*
 |--------------------------------------------------------------------------
