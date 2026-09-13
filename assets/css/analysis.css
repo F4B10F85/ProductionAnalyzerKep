@@ -804,3 +804,61 @@ input {
 .monthly-family-value-row td {
     font-weight: 800 !important;
 }
+
+.pdf-header {
+
+    margin-bottom:
+        12mm;
+
+    text-align:
+        center;
+
+}
+
+
+.pdf-logo {
+
+    display:
+        block;
+
+    width:
+        55mm;
+
+    height:
+        auto;
+
+    margin:
+        0 auto 8mm;
+
+}
+
+
+.pdf-title {
+
+    margin:
+        0;
+
+    color:
+        #0b4ea2;
+
+    font-size:
+        24px;
+
+    font-weight:
+        800;
+
+}
+
+
+.pdf-period {
+
+    margin-top:
+        3mm;
+
+    color:
+        #606b78;
+
+    font-size:
+        15px;
+
+}

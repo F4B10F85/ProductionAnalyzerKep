@@ -1662,6 +1662,558 @@ function renderMonthlyFamilyTable(
 
 /*
 |--------------------------------------------------------------------------
+| Esportazione PDF - Riepilogo per famiglia
+|--------------------------------------------------------------------------
+*/
+
+function exportMonthlyFamilyToPDF() {
+
+    const year =
+        document.getElementById(
+            "analysisYear"
+        )?.value || "";
+
+
+    const month =
+        document.getElementById(
+            "analysisMonth"
+        )?.value || "";
+
+
+    if (
+        !year ||
+        !month
+    ) {
+
+        alert(
+            "Seleziona prima anno e mese."
+        );
+
+        return;
+
+    }
+
+
+    const table =
+        document.querySelector(
+            ".monthly-family-table"
+        );
+
+
+    if (!table) {
+
+        alert(
+            "Tabella Riepilogo per famiglia non trovata."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Clonazione della tabella
+    |--------------------------------------------------------------------------
+    |
+    | Usiamo la tabella già presente nella pagina.
+    | In questo modo il PDF utilizza esattamente gli stessi dati
+    | mostrati nell'analisi.
+    |
+    */
+
+    const pdfTable =
+        table.cloneNode(
+            true
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mostra tutte le righe
+    |--------------------------------------------------------------------------
+    |
+    | Le righe degli OdCL vengono normalmente nascoste dal pulsante "+".
+    | Nel PDF devono essere sempre visibili.
+    |
+    */
+
+    pdfTable
+        .querySelectorAll(
+            ".monthly-family-detail-row"
+        )
+        .forEach(
+            row => {
+
+                row.classList.remove(
+                    "hidden"
+                );
+
+            }
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nome mese
+    |--------------------------------------------------------------------------
+    */
+
+    const monthName =
+        getMonthName(
+            month
+        )
+        .toUpperCase();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nome file suggerito
+    |--------------------------------------------------------------------------
+    */
+
+    const fileName =
+        `Riepilogo_Famiglia_${monthName}_${year}`;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nuova finestra
+    |--------------------------------------------------------------------------
+    */
+
+    const printWindow =
+        window.open(
+            "",
+            "_blank",
+            "width=1400,height=900,resizable=yes,scrollbars=yes"
+        );
+
+
+    if (!printWindow) {
+
+        alert(
+            "Impossibile aprire la finestra del report. Controlla che il browser non stia bloccando i popup."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Documento PDF / stampa
+    |--------------------------------------------------------------------------
+    */
+
+    printWindow.document.open();
+
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+
+        <html lang="it">
+
+        <head>
+
+            <meta charset="UTF-8">
+
+            <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1.0"
+            >
+
+            <title>
+                ${fileName}
+            </title>
+
+            <style>
+                
+                @page {
+
+                    size:
+                        A3 portrait;
+
+                    margin:
+                        10mm;
+
+                }
+
+                * {
+
+                    -webkit-print-color-adjust:
+                        exact;
+
+                    print-color-adjust:
+                        exact;
+
+                }
+
+                * {
+
+                    box-sizing:
+                        border-box;
+
+                }
+
+
+                body {
+
+                    margin:
+                        0;
+
+                    padding:
+                        0;
+
+                    font-family:
+                        "Ebrima",
+                        "Segoe UI",
+                        Arial,
+                        sans-serif;
+
+                    color:
+                        #17202b;
+
+                    background:
+                        #ffffff;
+
+                }
+
+
+                .pdf-report {
+
+                    width:
+                        100%;
+
+                }
+
+
+                .pdf-header {
+
+                    margin-bottom:
+                        18px;
+
+                    padding-bottom:
+                        10px;
+
+                    border-bottom:
+                        2px solid
+                        #0b4ea2;
+
+                }
+
+
+                .pdf-title {
+
+                    margin:
+                        0;
+
+                    color:
+                        #0b4ea2;
+
+                    font-size:
+                        22px;
+
+                    font-weight:
+                        800;
+
+                }
+
+                .pdf-logo {
+
+                    display:
+                        block;
+
+                    width:
+                        45mm;
+
+                    height:
+                        auto;
+
+                    margin:
+                        0 auto 5mm;
+
+                }
+
+
+                .pdf-period {
+
+                    margin-top:
+                        4px;
+
+                    color:
+                        #606b78;
+
+                    font-size:
+                        13px;
+
+                }
+
+
+                .monthly-family-table {
+
+                    width:
+                        100%;
+
+                    table-layout:
+                        fixed;
+
+                    border-collapse:
+                        collapse;
+
+                    page-break-inside:
+                        avoid;
+
+                }
+
+
+                .monthly-family-table th {
+
+                    padding:
+                        7px 5px;
+
+                    color:
+                        #ffffff;
+
+                    background:
+                        #124b86;
+
+                    border:
+                        1px solid
+                        #d8e0e8;
+
+                    font-size:
+                        10px;
+
+                    font-weight:
+                        700;
+
+                    text-align:
+                        center;
+
+                    white-space:
+                        nowrap;
+
+                }
+
+
+                .monthly-family-table td {
+
+                    padding:
+                        6px 5px;
+
+                    color:
+                        #1b1f24;
+
+                    background:
+                        #ffffff;
+
+                    border:
+                        1px solid
+                        #cbd1d7;
+
+                    font-size:
+                        10px;
+
+                    font-weight:
+                        500;
+
+                    text-align:
+                        center;
+
+                }
+
+
+                .monthly-family-table .row-label {
+
+                    width:
+                        105px;
+
+                    text-align:
+                        left !important;
+
+                    font-size:
+                        10px !important;
+
+                    font-weight:
+                        700 !important;
+
+                }
+
+
+                .monthly-family-table .total-cell {
+
+                    color:
+                        #0b4ea2;
+
+                    background:
+                        #eafaf2;
+
+                    font-weight:
+                        800;
+
+                }
+
+
+                .monthly-family-table .monthly-family-quantity-row td,
+                .monthly-family-table .monthly-family-value-row td,
+                .monthly-family-table .monthly-family-total-row td {
+
+                    font-weight:
+                        800;
+
+                }
+
+
+                .monthly-family-table .monthly-family-quantity-row td {
+
+                    background:
+                        #f2f6fc;
+
+                }
+
+
+                .monthly-family-table .monthly-family-value-row td {
+
+                    background:
+                        #f9fddf;
+
+                }
+
+
+                thead {
+
+                    display:
+                        table-header-group;
+
+                }
+
+
+                tr {
+
+                    page-break-inside:
+                        avoid;
+
+                }
+
+
+                .pdf-footer {
+
+                    margin-top:
+                        12px;
+
+                    padding-top:
+                        8px;
+
+                    border-top:
+                        1px solid
+                        #cfd5dc;
+
+                    color:
+                        #606b78;
+
+                    font-size:
+                        9px;
+
+                    text-align:
+                        right;
+
+                }
+
+
+                @media print {
+
+                    .no-print {
+
+                        display:
+                            none !important;
+
+                    }
+
+                }
+
+            </style>
+
+        </head>
+
+
+        <body>
+
+            <div class="pdf-report">
+
+                <div class="pdf-header">
+
+                    <img
+                        class="pdf-logo"
+                        src="assets/images/kep-italia-nero.png"
+                        alt="Kep"
+                    >
+
+                    <h1 class="pdf-title">
+                        RIEPILOGO PER FAMIGLIA
+                    </h1>
+
+                    <div class="pdf-period">
+                        ${monthName} ${year}
+                    </div>
+
+                </div>
+
+
+                ${pdfTable.outerHTML}
+
+
+                <div class="pdf-footer">
+
+                    <div>
+                        Production Analyzer Kep
+                    </div>
+
+                    <div>
+                        Versione 1.3.0
+                    </div>
+
+                    <div>
+                        Sviluppato da Fabio Filippini
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <script>
+
+                window.onload =
+                    function() {
+
+                        setTimeout(
+                            function() {
+
+                                window.print();
+
+                            },
+                            300
+                        );
+
+                    };
+
+            <\/script>
+
+        </body>
+
+        </html>
+    `);
+
+
+    printWindow.document.close();
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
 | Esportazione Excel - Riepilogo per famiglia
 |--------------------------------------------------------------------------
 */
@@ -3142,6 +3694,21 @@ document.addEventListener(
             familyExcelButton.addEventListener(
                 "click",
                 exportMonthlyFamilyToExcel
+            );
+
+        }
+
+        const familyPDFButton =
+            document.getElementById(
+                "monthlyFamilyPDF"
+            );
+
+
+        if (familyPDFButton) {
+
+            familyPDFButton.addEventListener(
+                "click",
+                exportMonthlyFamilyToPDF
             );
 
         }
