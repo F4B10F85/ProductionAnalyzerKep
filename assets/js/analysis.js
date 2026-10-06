@@ -1776,6 +1776,59 @@ function exportMonthlyFamilyToPDF() {
         `Riepilogo_Famiglia_${monthName}_${year}`;
 
 
+    const pdfCharts = [];
+
+    const chartDefinitions = [
+        {
+            chart: chartFamilyQuantity,
+            title: "PRODUZIONE PER FAMIGLIA"
+        },
+        {
+            chart: chartFamilyValue,
+            title: "LAVORAZIONE PER FAMIGLIA"
+        },
+        {
+            chart: chartODCLValue,
+            title: "LAVORAZIONE PER ODCL"
+        },
+        {
+            chart: chartODCLQuantity,
+            title: "PRODUZIONE PER ODCL"
+        }
+    ];
+
+    chartDefinitions.forEach(item => {
+
+        if (
+            item.chart &&
+            typeof item.chart.toBase64Image === "function"
+        ) {
+
+            pdfCharts.push({
+
+                title:
+                    item.title,
+
+                image:
+                    item.chart.toBase64Image(
+                        "image/png",
+                        1
+                    )
+
+            });
+
+        }
+
+    });
+
+
+
+
+
+
+
+
+
     /*
     |--------------------------------------------------------------------------
     | Nuova finestra
@@ -1963,7 +2016,10 @@ function exportMonthlyFamilyToPDF() {
                         collapse;
 
                     page-break-inside:
-                        avoid;
+                        auto;
+
+                    break-inside:
+                        auto;
 
                 }
 
@@ -2083,17 +2139,85 @@ function exportMonthlyFamilyToPDF() {
 
 
                 thead {
-
                     display:
                         table-header-group;
-
                 }
 
+                tbody {
+                    display:
+                        table-row-group;
+                }
 
-                tr {
+                .monthly-family-table tbody tr {
 
                     page-break-inside:
                         avoid;
+
+                    break-inside:
+                        avoid;
+
+                }
+
+                .pdf-charts {
+                    display:
+                        grid;
+
+                    grid-template-columns:
+                        1fr 1fr;
+
+                    gap:
+                        10mm;
+
+                    margin-top:
+                        12mm;
+
+                    page-break-inside:
+                        avoid;
+                }
+
+                .pdf-chart-box {
+
+                    border:
+                        1px solid
+                        #cfd5dc;
+
+                    padding:
+                        5mm;
+
+                    page-break-inside:
+                        avoid;
+
+                }
+
+                .pdf-chart-title {
+
+                    font-size:
+                        12px;
+
+                    font-weight:
+                        800;
+
+                    text-align:
+                        center;
+
+                    margin-bottom:
+                        4mm;
+
+                    color:
+                        #25313d;
+
+                }
+
+                .pdf-chart-image {
+
+                    display:
+                        block;
+
+                    width:
+                        100%;
+
+                    height:
+                        auto;
 
                 }
 
@@ -2162,6 +2286,28 @@ function exportMonthlyFamilyToPDF() {
 
 
                 ${pdfTable.outerHTML}
+
+                <div class="pdf-charts">
+
+                    ${pdfCharts.map(chart => `
+
+                        <div class="pdf-chart-box">
+
+                            <div class="pdf-chart-title">
+                                ${chart.title}
+                            </div>
+
+                            <img
+                                class="pdf-chart-image"
+                                src="${chart.image}"
+                                alt="${chart.title}"
+                            >
+
+                        </div>
+
+                    `).join("")}
+
+                </div>
 
 
                 <div class="pdf-footer">
